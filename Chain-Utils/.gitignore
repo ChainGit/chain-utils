@@ -1,0 +1,7 @@
+/out/
+/lib/
+/doc/
+/bin/
+.settings
+.classpath
+.project
