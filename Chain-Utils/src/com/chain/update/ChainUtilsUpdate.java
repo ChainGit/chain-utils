@@ -10,13 +10,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
+import com.chain.utils.FileDirectoryUtils;
 import com.chain.utils.FileVerifyUtils;
 
 /**
  * chain-utils更新类
  * 
  * @author Chain Qian
- * @version 1.1
+ * @version 1.2
  *
  */
 public class ChainUtilsUpdate {
@@ -50,6 +51,51 @@ public class ChainUtilsUpdate {
 		version = localProp.getProperty("version");
 		fullName = baseName + version + tailName;
 		System.out.println("this local jar's current version is: " + fullName);
+	}
+
+	/**
+	 * 将生成的jar进行部署(仅限本工具类的开发者使用)
+	 * 
+	 * @param dir
+	 *            基础路径
+	 * @throws IOException
+	 *             异常
+	 */
+	public static void deploy(String dir) throws IOException {
+		File file = new File("");
+		String workPath = file.getAbsolutePath();
+		// System.out.println(workPath);
+		String currentVersion = localProp.getProperty("version");
+		String newVersionPath = dir + File.separator + currentVersion;
+		String latestVersionPath = dir + File.separator + "latest";
+		FileDirectoryUtils fdu = new FileDirectoryUtils();
+		File newVersionDir = new File(newVersionPath);
+		if (newVersionDir.exists())
+			fdu.deleteDirectory(newVersionDir);
+		newVersionDir.mkdirs();
+		File latestVersionDir = new File(latestVersionPath);
+		if (latestVersionDir.exists())
+			fdu.emptyDirectory(latestVersionDir);
+		latestVersionDir.mkdirs();
+		File newestJar = new File(workPath + File.separator + "out" + File.separator + fullName);
+		FileDirectoryUtils.getInstance().copyFile(newestJar, new File(newVersionDir + File.separator + fullName));
+		String latestJar = baseName + "latest" + tailName;
+		FileDirectoryUtils.getInstance().copyFile(newestJar, new File(latestVersionPath + File.separator + latestJar));
+		String historyTxt = workPath + File.separator + "src" + File.separator + "history.txt";
+		FileDirectoryUtils.getInstance().copyFile(historyTxt, latestVersionPath + File.separator + "history.txt");
+		String versionTxt = workPath + File.separator + "src" + File.separator + "version.txt";
+		FileDirectoryUtils.getInstance().copyFile(versionTxt, latestVersionPath + File.separator + "version.txt");
+		String md5 = FileVerifyUtils.verify(FileVerifyUtils.MD5, newestJar.getAbsolutePath());
+		String sha1 = FileVerifyUtils.verify(FileVerifyUtils.SHA1, newestJar.getAbsolutePath());
+		String crc32 = FileVerifyUtils.verify(FileVerifyUtils.CRC32, newestJar.getAbsolutePath());
+		BufferedOutputStream fos = new BufferedOutputStream(
+				new FileOutputStream(new File(latestVersionPath + File.separator + "version.txt"), true));
+		fos.write("\r\n".getBytes());
+		fos.write(("MD5=" + md5 + "\r\n").getBytes());
+		fos.write(("SHA1=" + sha1 + "\r\n").getBytes());
+		fos.write(("CRC32=" + crc32 + "\r\n").getBytes());
+		fos.flush();
+		fos.close();
 	}
 
 	/**
@@ -91,6 +137,7 @@ public class ChainUtilsUpdate {
 			return;
 		URL url = new URL(baseURL + serverName);
 		URLConnection conn = url.openConnection();
+		conn.connect();
 		InputStream is = conn.getInputStream();
 		BufferedInputStream bis = new BufferedInputStream(is);
 		String filePath = baseDir + File.separator + serverName;
@@ -125,7 +172,7 @@ public class ChainUtilsUpdate {
 	 * 
 	 */
 	public static void update() throws IOException {
-		update("");
+		update("." + File.separator);
 	}
 
 	/**
