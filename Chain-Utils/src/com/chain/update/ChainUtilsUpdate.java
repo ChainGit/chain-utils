@@ -135,7 +135,7 @@ public class ChainUtilsUpdate {
 	public static void update(String baseDir) throws IOException {
 		if (check())
 			return;
-		URL url = new URL(baseURL + serverName);
+		URL url = new URL(baseURL + baseName + "latest" + tailName);
 		URLConnection conn = url.openConnection();
 		conn.connect();
 		InputStream is = conn.getInputStream();
