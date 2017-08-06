@@ -2,10 +2,12 @@ package com.chain.update;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
@@ -136,7 +138,9 @@ public class ChainUtilsUpdate {
 		if (check())
 			return;
 		URL url = new URL(baseURL + baseName + "latest" + tailName);
-		URLConnection conn = url.openConnection();
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("GET");
+		conn.setConnectTimeout(5 * 1000);
 		conn.connect();
 		InputStream is = conn.getInputStream();
 		BufferedInputStream bis = new BufferedInputStream(is);
@@ -144,13 +148,20 @@ public class ChainUtilsUpdate {
 		File f = new File(filePath);
 		if (f.exists())
 			f.delete();
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		byte[] buf = new byte[1024 * 8];
-		while (bis.read(buf) != -1) {
-			bos.write(buf);
+		int len = -1;
+		while ((len = bis.read(buf)) != -1) {
+			baos.write(buf, 0, len);
 		}
-		bos.flush();
+		baos.flush();
 		bis.close();
+		byte[] data = baos.toByteArray();
+		baos.close();
+
+		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+		bos.write(data);
+		bos.flush();
 		bos.close();
 
 		File file = new File(filePath);
