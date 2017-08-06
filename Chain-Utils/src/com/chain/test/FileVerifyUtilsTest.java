@@ -1,7 +1,5 @@
 package com.chain.test;
 
-import java.io.IOException;
-
 import org.junit.Test;
 
 import com.chain.utils.FileVerifyUtils;
@@ -10,7 +8,7 @@ public class FileVerifyUtilsTest {
 
 	// 文件校验
 	@Test
-	public void test2() throws IOException {
+	public void test2() throws Exception {
 		String fileName = "E:\\Temps\\test.txt";
 		String crc32 = FileVerifyUtils.verify(FileVerifyUtils.CRC32, fileName);
 		String md5 = FileVerifyUtils.verify(FileVerifyUtils.MD5, fileName);

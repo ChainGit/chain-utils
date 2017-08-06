@@ -2,6 +2,9 @@ package com.chain.utils;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * IPv4地址工具类：部分方法依赖servlet-api.jar
  * 
@@ -11,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 
 public class Inet4AddressUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(Inet4AddressUtils.class);
 
 	private static final int DEFAULT = -1;
 
@@ -166,7 +171,7 @@ public class Inet4AddressUtils {
 			int i4 = ScaleConvertUtils.parseHexString(s4);
 			return i4 + DOT + i3 + DOT + i2 + DOT + i1;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("IP地址转化错误!", e);
 		}
 		return null;
 	}

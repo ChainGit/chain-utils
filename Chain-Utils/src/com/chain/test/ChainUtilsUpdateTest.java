@@ -22,7 +22,7 @@ public class ChainUtilsUpdateTest {
 	}
 
 	@Test
-	public void deploy() throws IOException {
+	public void deploy() throws Exception {
 		String dir = AESUtils.getInstance().decrypt(DEPLOY_DIR, KEY);
 		// System.out.println(dir);
 		ChainUtilsUpdate.deploy(dir);

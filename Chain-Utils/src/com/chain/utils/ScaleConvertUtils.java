@@ -2,6 +2,9 @@ package com.chain.utils;
 
 import java.math.BigInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 进制转换工具类<br>
  * 
@@ -29,6 +32,8 @@ import java.math.BigInteger;
  *
  */
 public class ScaleConvertUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(ScaleConvertUtils.class);
 
 	private static Class<ScaleConvertUtils> clz = ScaleConvertUtils.class;
 
@@ -90,41 +95,47 @@ public class ScaleConvertUtils {
 	 *            字符串的进制
 	 * @param dst
 	 *            需要转换成的类型
-	 *            @param <T> 要转换的类型
+	 * @param <T>
+	 *            要转换的类型
 	 * @return 转换后的
 	 * @throws Exception
 	 *             异常
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T parseString(String src, int scale, Class<T> dst) throws Exception {
-		src = formatSrcString(src);
-		checkSrcString(src);
-		// System.out.println("format: " + src);
-		ScaleConvertUtils utils = getInstance();
-		if (dst == Byte.class || dst == Short.class || dst == Integer.class || dst == Long.class) {
-			long result = utils.parseStringToLong(src, scale);
-			// 下面的操作可能会导致转换结果不准确
-			if (dst == Byte.class)
-				return (T) new Byte((byte) result);
-			else if (dst == Short.class)
-				return (T) new Short((short) result);
-			else if (dst == Integer.class)
-				return (T) new Integer((int) result);
-			else if (dst == Long.class)
-				return (T) new Long(result);
-		} else if (dst == Float.class || dst == Double.class) {
-			// TODO 浮点数尚未支持
-			if (dst == Float.class) {
-				int lval = parseString(src, scale, Integer.class);
-				float fval = Float.intBitsToFloat(lval);
-				return (T) new Float(fval);
-			} else {
-				long lval = parseString(src, scale, Long.class);
-				double dval = Double.longBitsToDouble(lval);
-				return (T) new Double(dval);
+		try {
+			src = formatSrcString(src);
+			checkSrcString(src);
+			// System.out.println("format: " + src);
+			ScaleConvertUtils utils = getInstance();
+			if (dst == Byte.class || dst == Short.class || dst == Integer.class || dst == Long.class) {
+				long result = utils.parseStringToLong(src, scale);
+				// 下面的操作可能会导致转换结果不准确
+				if (dst == Byte.class)
+					return (T) new Byte((byte) result);
+				else if (dst == Short.class)
+					return (T) new Short((short) result);
+				else if (dst == Integer.class)
+					return (T) new Integer((int) result);
+				else if (dst == Long.class)
+					return (T) new Long(result);
+			} else if (dst == Float.class || dst == Double.class) {
+				// TODO 浮点数尚未支持
+				if (dst == Float.class) {
+					int lval = parseString(src, scale, Integer.class);
+					float fval = Float.intBitsToFloat(lval);
+					return (T) new Float(fval);
+				} else {
+					long lval = parseString(src, scale, Long.class);
+					double dval = Double.longBitsToDouble(lval);
+					return (T) new Double(dval);
+				}
 			}
+			return null;
+		} catch (Exception e) {
+			logger.error("parseStrin错误", e);
+			throw e;
 		}
-		return null;
 	}
 
 	/**
@@ -344,7 +355,7 @@ public class ScaleConvertUtils {
 				String s = toString(ival, scale);
 				sb.append(s).reverse();
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("floatPointNumberMethod错误", e);
 			}
 		} else if (obj instanceof Double) {
 			double value = (Double) obj;
@@ -355,7 +366,7 @@ public class ScaleConvertUtils {
 				String s = toString(ival, scale);
 				sb.append(s).reverse();
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("floatPointNumberMethod错误2", e);
 			}
 		}
 		return sb;
@@ -576,7 +587,7 @@ public class ScaleConvertUtils {
 		try {
 			return clz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
+			logger.error("getInstance错误", e);
 		}
 		return new ScaleConvertUtils();
 	}

@@ -10,6 +10,9 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 反射工具类
  * 
@@ -20,6 +23,8 @@ import java.util.List;
  *
  */
 public class ReflectionUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(ReflectionUtils.class);
 
 	/**
 	 * 根据类名（className）获得对应的“类实例”（instance of Class）
@@ -33,7 +38,7 @@ public class ReflectionUtils {
 		try {
 			clz = Class.forName(className);
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			logger.error("getClassByName错误", e);
 		}
 		return clz;
 	}
@@ -119,7 +124,7 @@ public class ReflectionUtils {
 		try {
 			obj = clz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
-			e.printStackTrace();
+			logger.error("getObjectByClass错误", e);
 		}
 		return obj;
 	}
@@ -211,7 +216,7 @@ public class ReflectionUtils {
 			setAccessible(f, true);
 			f.set(obj, value);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
+			logger.error("setField错误", e);
 		}
 		return obj;
 	}
@@ -261,7 +266,7 @@ public class ReflectionUtils {
 			obj = cs.newInstance(initArgs);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
-			e.printStackTrace();
+			logger.error("newInstanceByConstrutor错误", e);
 		}
 		return obj;
 	}

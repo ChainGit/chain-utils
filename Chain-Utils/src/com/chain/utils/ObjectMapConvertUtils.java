@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Java对象和Map之间的互转
  * 
@@ -16,6 +19,8 @@ import java.util.Set;
  *
  */
 public class ObjectMapConvertUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(ObjectMapConvertUtils.class);
 
 	/**
 	 * map转object
@@ -36,21 +41,26 @@ public class ObjectMapConvertUtils {
 		if (map == null)
 			return null;
 
-		Object obj = beanClass.newInstance();
+		try {
+			Object obj = beanClass.newInstance();
 
-		BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
-		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor property : propertyDescriptors) {
-			Method setter = property.getWriteMethod();
-			if (setter != null) {
-				String name = property.getName();
-				if (filters == null || !filters.contains(name)) {
-					setter.invoke(obj, map.get(name));
+			BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
+			PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor property : propertyDescriptors) {
+				Method setter = property.getWriteMethod();
+				if (setter != null) {
+					String name = property.getName();
+					if (filters == null || !filters.contains(name)) {
+						setter.invoke(obj, map.get(name));
+					}
 				}
 			}
-		}
 
-		return (T) obj;
+			return (T) obj;
+		} catch (Exception e) {
+			logger.error("map转为object错误", e);
+			throw e;
+		}
 	}
 
 	/**
@@ -66,20 +76,25 @@ public class ObjectMapConvertUtils {
 		if (obj == null)
 			return null;
 
-		Map<String, Object> map = new HashMap<String, Object>();
+		try {
+			Map<String, Object> map = new HashMap<String, Object>();
 
-		BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
-		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-		for (PropertyDescriptor property : propertyDescriptors) {
-			String key = property.getName();
-			if (key.compareToIgnoreCase("class") == 0) {
-				continue;
+			BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass());
+			PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor property : propertyDescriptors) {
+				String key = property.getName();
+				if (key.compareToIgnoreCase("class") == 0) {
+					continue;
+				}
+				Method getter = property.getReadMethod();
+				Object value = getter != null ? getter.invoke(obj) : null;
+				map.put(key, value);
 			}
-			Method getter = property.getReadMethod();
-			Object value = getter != null ? getter.invoke(obj) : null;
-			map.put(key, value);
-		}
 
-		return map;
+			return map;
+		} catch (Exception e) {
+			logger.error("object转为map错误", e);
+			throw e;
+		}
 	}
 }
