@@ -6,9 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 文件和文件夹工具类
  * 
@@ -17,8 +14,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class FileDirectoryUtils {
-
-	private static final Logger logger = LoggerFactory.getLogger(CookieUtils.class);
 
 	/**
 	 * 移动文件（注意读写权限）<br>
@@ -68,7 +63,7 @@ public class FileDirectoryUtils {
 			out = fo.getChannel();// 得到对应的文件通道
 			in.transferTo(0, in.size(), out);// 连接两个通道，并且从in通道读取，然后写入out通道
 		} catch (IOException e) {
-			logger.error("复制文件错误!", e);
+			e.printStackTrace();
 		} finally {
 			try {
 				fi.close();
@@ -76,7 +71,7 @@ public class FileDirectoryUtils {
 				fo.close();
 				out.close();
 			} catch (IOException e) {
-				logger.error("复制文件又错误了!", e);
+				e.printStackTrace();
 			}
 		}
 	}
@@ -118,24 +113,19 @@ public class FileDirectoryUtils {
 	 *             异常
 	 */
 	public void copyDirectory(String from, String to) throws IOException {
-		try {
-			File src = new File(from);
-			File dest = new File(to);
-			if (src.isDirectory()) {
-				if (!dest.exists()) {
-					dest.mkdir();
-				}
-				String files[] = src.list();
-				for (String file : files) {
-					// 递归复制
-					copyDirectory(src + File.separator + file, dest + File.separator + file);
-				}
-			} else {
-				copyFile(src, dest);
+		File src = new File(from);
+		File dest = new File(to);
+		if (src.isDirectory()) {
+			if (!dest.exists()) {
+				dest.mkdir();
 			}
-		} catch (Exception e) {
-			logger.error("复制目录发生错误!", e);
-			throw e;
+			String files[] = src.list();
+			for (String file : files) {
+				// 递归复制
+				copyDirectory(src + File.separator + file, dest + File.separator + file);
+			}
+		} else {
+			copyFile(src, dest);
 		}
 	}
 

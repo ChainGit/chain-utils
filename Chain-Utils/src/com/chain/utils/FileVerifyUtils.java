@@ -9,9 +9,6 @@ import java.security.MessageDigest;
 import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 文件校验 MD5,SHA1,CRC32
  *
@@ -20,8 +17,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class FileVerifyUtils {
-
-	private static final Logger logger = LoggerFactory.getLogger(FileVerifyUtils.class);
 
 	public static final String MD5 = "MD5";
 	public static final String SHA1 = "SHA1";
@@ -39,32 +34,27 @@ public class FileVerifyUtils {
 	 *             异常
 	 */
 	public static String verify(String type, String filePath) throws Exception {
-		try {
-			CheckedInputStream cis = null;
-			File file = new File(filePath);
-			if (CRC32.equals(type)) {
-				cis = new CheckedInputStream(new FileInputStream(file), new CRC32());
-				byte[] bytes = new byte[1024 * 8];
-				while (cis.read(bytes) != -1)
-					;
-				long res = cis.getChecksum().getValue();
-				cis.close();
-				return Long.toHexString(res);
-			} else {
-				String value = null;
-				FileInputStream is = null;
-				is = new FileInputStream(filePath);
-				MappedByteBuffer byteBuffer = is.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
-				MessageDigest md5 = MessageDigest.getInstance(type);
-				md5.update(byteBuffer);
-				BigInteger bi = new BigInteger(1, md5.digest());
-				value = bi.toString(16);
-				is.close();
-				return value;
-			}
-		} catch (Exception e) {
-			logger.error("验证发生错误", e);
-			throw e;
+		CheckedInputStream cis = null;
+		File file = new File(filePath);
+		if (CRC32.equals(type)) {
+			cis = new CheckedInputStream(new FileInputStream(file), new CRC32());
+			byte[] bytes = new byte[1024 * 8];
+			while (cis.read(bytes) != -1)
+				;
+			long res = cis.getChecksum().getValue();
+			cis.close();
+			return Long.toHexString(res);
+		} else {
+			String value = null;
+			FileInputStream is = null;
+			is = new FileInputStream(filePath);
+			MappedByteBuffer byteBuffer = is.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+			MessageDigest md5 = MessageDigest.getInstance(type);
+			md5.update(byteBuffer);
+			BigInteger bi = new BigInteger(1, md5.digest());
+			value = bi.toString(16);
+			is.close();
+			return value;
 		}
 	}
 
