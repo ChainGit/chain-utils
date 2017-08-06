@@ -16,9 +16,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.chain.utils.FileDirectoryUtils;
 import com.chain.utils.FileVerifyUtils;
 
@@ -30,8 +27,6 @@ import com.chain.utils.FileVerifyUtils;
  *
  */
 public class ChainUtilsUpdate {
-
-	private static final Logger logger = LoggerFactory.getLogger(ChainUtilsUpdate.class);
 
 	// 只有version
 	private static Properties localProp = null;
@@ -57,7 +52,7 @@ public class ChainUtilsUpdate {
 		try {
 			localProp.load(is);
 		} catch (IOException e) {
-			logger.error("加载本地的version.txt错误", e);
+			e.printStackTrace();
 		}
 		version = localProp.getProperty("version");
 		fullName = baseName + version + tailName;
@@ -73,57 +68,51 @@ public class ChainUtilsUpdate {
 	 *             异常
 	 */
 	public static void deploy(String dir) throws Exception {
-		try {
-			File file = new File("");
-			String workPath = file.getAbsolutePath();
-			// System.out.println(workPath);
-			String currentVersion = localProp.getProperty("version");
-			String newVersionPath = dir + File.separator + currentVersion;
-			String latestVersionPath = dir + File.separator + "latest";
-			FileDirectoryUtils fdu = new FileDirectoryUtils();
-			File newVersionDir = new File(newVersionPath);
-			if (newVersionDir.exists())
-				fdu.deleteDirectory(newVersionDir);
-			newVersionDir.mkdirs();
-			File latestVersionDir = new File(latestVersionPath);
-			if (latestVersionDir.exists())
-				fdu.emptyDirectory(latestVersionDir);
-			latestVersionDir.mkdirs();
-			File newestJar = new File(workPath + File.separator + "out" + File.separator + fullName);
-			FileDirectoryUtils.getInstance().copyFile(newestJar, new File(newVersionDir + File.separator + fullName));
-			String latestJar = baseName + "latest" + tailName;
-			FileDirectoryUtils.getInstance().copyFile(newestJar,
-					new File(latestVersionPath + File.separator + latestJar));
-			String historyTxt = workPath + File.separator + "src" + File.separator + "history.txt";
-			BufferedWriter bw = new BufferedWriter(new FileWriter(latestVersionPath + File.separator + "history.txt"));
-			BufferedReader br = new BufferedReader(new FileReader(historyTxt));
-			String buf = null;
-			while ((buf = br.readLine()) != null) {
-				bw.write(buf + "<br/>");
-				bw.newLine();
-			}
-			bw.flush();
-			br.close();
-			bw.close();
-			// FileDirectoryUtils.getInstance().copyFile(historyTxt, latestVersionPath +
-			// File.separator + "history.txt");
-			String versionTxt = workPath + File.separator + "src" + File.separator + "version.txt";
-			FileDirectoryUtils.getInstance().copyFile(versionTxt, latestVersionPath + File.separator + "version.txt");
-			String md5 = FileVerifyUtils.verify(FileVerifyUtils.MD5, newestJar.getAbsolutePath());
-			String sha1 = FileVerifyUtils.verify(FileVerifyUtils.SHA1, newestJar.getAbsolutePath());
-			String crc32 = FileVerifyUtils.verify(FileVerifyUtils.CRC32, newestJar.getAbsolutePath());
-			BufferedOutputStream fos = new BufferedOutputStream(
-					new FileOutputStream(new File(latestVersionPath + File.separator + "version.txt"), true));
-			fos.write("\r\n".getBytes());
-			fos.write(("MD5=" + md5 + "\r\n").getBytes());
-			fos.write(("SHA1=" + sha1 + "\r\n").getBytes());
-			fos.write(("CRC32=" + crc32 + "\r\n").getBytes());
-			fos.flush();
-			fos.close();
-		} catch (Exception ex) {
-			logger.error("deploy发生异常!", ex);
-			throw ex;
+		File file = new File("");
+		String workPath = file.getAbsolutePath();
+		// System.out.println(workPath);
+		String currentVersion = localProp.getProperty("version");
+		String newVersionPath = dir + File.separator + currentVersion;
+		String latestVersionPath = dir + File.separator + "latest";
+		FileDirectoryUtils fdu = new FileDirectoryUtils();
+		File newVersionDir = new File(newVersionPath);
+		if (newVersionDir.exists())
+			fdu.deleteDirectory(newVersionDir);
+		newVersionDir.mkdirs();
+		File latestVersionDir = new File(latestVersionPath);
+		if (latestVersionDir.exists())
+			fdu.emptyDirectory(latestVersionDir);
+		latestVersionDir.mkdirs();
+		File newestJar = new File(workPath + File.separator + "out" + File.separator + fullName);
+		FileDirectoryUtils.getInstance().copyFile(newestJar, new File(newVersionDir + File.separator + fullName));
+		String latestJar = baseName + "latest" + tailName;
+		FileDirectoryUtils.getInstance().copyFile(newestJar, new File(latestVersionPath + File.separator + latestJar));
+		String historyTxt = workPath + File.separator + "src" + File.separator + "history.txt";
+		BufferedWriter bw = new BufferedWriter(new FileWriter(latestVersionPath + File.separator + "history.txt"));
+		BufferedReader br = new BufferedReader(new FileReader(historyTxt));
+		String buf = null;
+		while ((buf = br.readLine()) != null) {
+			bw.write(buf + "<br/>");
+			bw.newLine();
 		}
+		bw.flush();
+		br.close();
+		bw.close();
+		// FileDirectoryUtils.getInstance().copyFile(historyTxt, latestVersionPath +
+		// File.separator + "history.txt");
+		String versionTxt = workPath + File.separator + "src" + File.separator + "version.txt";
+		FileDirectoryUtils.getInstance().copyFile(versionTxt, latestVersionPath + File.separator + "version.txt");
+		String md5 = FileVerifyUtils.verify(FileVerifyUtils.MD5, newestJar.getAbsolutePath());
+		String sha1 = FileVerifyUtils.verify(FileVerifyUtils.SHA1, newestJar.getAbsolutePath());
+		String crc32 = FileVerifyUtils.verify(FileVerifyUtils.CRC32, newestJar.getAbsolutePath());
+		BufferedOutputStream fos = new BufferedOutputStream(
+				new FileOutputStream(new File(latestVersionPath + File.separator + "version.txt"), true));
+		fos.write("\r\n".getBytes());
+		fos.write(("MD5=" + md5 + "\r\n").getBytes());
+		fos.write(("SHA1=" + sha1 + "\r\n").getBytes());
+		fos.write(("CRC32=" + crc32 + "\r\n").getBytes());
+		fos.flush();
+		fos.close();
 	}
 
 	/**
@@ -232,7 +221,7 @@ public class ChainUtilsUpdate {
 			if (vcrc32.equals(fcrc32) && vmd5.equals(fmd5) && vsha1.equals(fsha1))
 				isOk = true;
 		} catch (Exception e) {
-			logger.error("文件验证发生异常!", e);
+			e.printStackTrace();
 		}
 		return isOk;
 	}
