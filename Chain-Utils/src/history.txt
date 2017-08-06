@@ -8,12 +8,16 @@
 1、servlet-api
 2、bcprov
 3、jmimemagic
+4、pinyin4j
 
 <hr/>
 
 <b>更新记录：</b>
 
-2017.08.06 - chain-utils-1.0.8：
+2017.08.07 - chain-utils-1.0.9：
+1、汉语转拼音
+
+2017.08.05 - chain-utils-1.0.8：
 1、Cookie常用操作
 2、文件简单上传和下载
 3、加入log的使用(slf4j和logback)

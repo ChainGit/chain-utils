@@ -1,5 +1,8 @@
 package com.chain.utils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -9,7 +12,7 @@ import org.slf4j.LoggerFactory;
  * IPv4地址工具类：部分方法依赖servlet-api.jar
  * 
  * @author Chain Qian
- * @version 1.0
+ * @version 1.1
  *
  */
 
@@ -44,6 +47,22 @@ public class Inet4AddressUtils {
 		}
 		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
 			ip = request.getRemoteAddr();
+			if (ip.equals("127.0.0.1") || ip.equals("0:0:0:0:0:0:0:1")) {
+				// 根据网卡得到本机配置的IP
+				InetAddress inet = null;
+				try {
+					inet = InetAddress.getLocalHost();
+				} catch (UnknownHostException e) {
+					logger.error("网卡错误", e);
+				}
+				ip = inet.getHostAddress();
+			}
+		}
+		// 对于通过多个代理的情况，第一个IP为客户端真实IP,多个IP按照','分割
+		if (ip != null && ip.length() > 15) {
+			if (ip.indexOf(",") > 0) {
+				ip = ip.substring(0, ip.indexOf(","));
+			}
 		}
 		return ip;
 	}
