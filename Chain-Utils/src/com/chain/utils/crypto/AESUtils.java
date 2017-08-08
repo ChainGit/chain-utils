@@ -82,6 +82,11 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * AES加解密
  * 
@@ -93,7 +98,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class AESUtils {
 
-	private static final String DEFAULT_PASSPHRASE = "123456";
+	private static final Logger logger = LoggerFactory.getLogger(AESUtils.class);
 
 	private static final String KEY_GENERATION_ALG = "PBKDF2WithHmacSHA1"; // PBEWITHSHAANDTWOFISH-CBC
 	private static final String CIPHERMODEPADDING = "AES/CBC/PKCS7Padding";
@@ -103,37 +108,58 @@ public class AESUtils {
 	private static final int HASH_ITERATIONS = 10000;
 	private static final int KEY_LENGTH = 128;
 
-	private static final byte[] salt = { 106, 105, 106, 105, 97, 0x1, 0x5, 0x9, 0x9, 0x6, 0x3, 0x7, 0x3, 0x3, 0x9,
+	private static final byte[] SALT = { 106, 105, 106, 105, 97, 0x1, 0x5, 0x9, 0x9, 0x6, 0x3, 0x7, 0x3, 0x3, 0x9,
 			0x0 }; // must
 
-	private static final byte[] iv = { 108, 105, 97, 110, 103, 0x1, 0x5, 0x9, 0x9, 0x6, 0x3, 0x7, 0x3, 0x3, 0x9, 0x0 };
+	private static final byte[] IV = { 108, 105, 97, 110, 103, 0x1, 0x5, 0x9, 0x9, 0x6, 0x3, 0x7, 0x3, 0x3, 0x9, 0x0 };
 
 	private static SecretKeyFactory keyfactory = null;
+
 	private SecretKey sk = null;
 	private SecretKeySpec skforAES = null;
 
-	private IvParameterSpec IV;
+	private IvParameterSpec iv;
 	private PBEKeySpec myKeyspec = null;
 
+	static {
+		if (keyfactory == null)
+			try {
+				keyfactory = SecretKeyFactory.getInstance(KEY_GENERATION_ALG);
+			} catch (NoSuchAlgorithmException e) {
+				logger.error("AES keyfactory get instance exception", e);
+				// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+				throw new ChainUtilsRuntimeException("AES keyfactory get instance exception", e);
+			}
+	}
+
+	public AESUtils(String passphrase) {
+		init(passphrase);
+	}
+
+	/**
+	 * 初始化
+	 * 
+	 * @param passphrase
+	 *            密码
+	 */
 	private void init(String passphrase) {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-		try {
-			myKeyspec = new PBEKeySpec(passphrase.toCharArray(), salt, HASH_ITERATIONS, KEY_LENGTH);
-			keyfactory = SecretKeyFactory.getInstance(KEY_GENERATION_ALG);
-			sk = keyfactory.generateSecret(myKeyspec);
-
-		} catch (NoSuchAlgorithmException nsae) {
-			System.out.println("no key factory support for PBEWITHSHAANDTWOFISH-CBC");
-		} catch (InvalidKeySpecException ikse) {
-			System.out.println("invalid key spec for PBEWITHSHAANDTWOFISH-CBC");
+		if (passphrase == null || passphrase.length() < 1) {
+			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
 		}
 
-		byte[] skAsByteArray = sk.getEncoded();
-
-		skforAES = new SecretKeySpec(skAsByteArray, "AES");
-
-		IV = new IvParameterSpec(iv);
+		try {
+			myKeyspec = new PBEKeySpec(passphrase.toCharArray(), SALT, HASH_ITERATIONS, KEY_LENGTH);
+			sk = keyfactory.generateSecret(myKeyspec);
+			byte[] skAsByteArray = sk.getEncoded();
+			skforAES = new SecretKeySpec(skAsByteArray, "AES");
+			iv = new IvParameterSpec(IV);
+		} catch (InvalidKeySpecException ikse) {
+			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
+		}
 	}
 
 	/**
@@ -141,17 +167,11 @@ public class AESUtils {
 	 * 
 	 * @param plaintext
 	 *            要加密的字符串
-	 * @param passphrase
-	 *            密钥
 	 * @return 加密字符串
 	 */
-	public String encrypt(String plaintext, String passphrase) {
-		if (passphrase == null || passphrase.length() < 1) {
-			passphrase = DEFAULT_PASSPHRASE;
-		}
-		init(passphrase);
-		byte[] ciphertext = encrypt(CIPHERMODEPADDING, skforAES, IV, plaintext);
-		String base64_ciphertext = Base64Encoder.encode(ciphertext);
+	public String encrypt(String plaintext) {
+		byte[] ciphertext = encrypt(CIPHERMODEPADDING, skforAES, iv, plaintext);
+		String base64_ciphertext = Base64Encoder.encodeFromBytes(ciphertext);
 		return base64_ciphertext;
 	}
 
@@ -161,77 +181,183 @@ public class AESUtils {
 	 * 
 	 * @param ciphertext_base64
 	 *            Base64编码的加密字符串
-	 * @param passphrase
-	 *            密钥
 	 * @return 解密字符串
 	 */
-	public String decrypt(String ciphertext_base64, String passphrase) {
-		if (passphrase == null || passphrase.length() < 1) {
-			passphrase = DEFAULT_PASSPHRASE;
-		}
-
-		init(passphrase);
+	public String decrypt(String ciphertext_base64) {
 		byte[] s = Base64Decoder.decodeToBytes(ciphertext_base64);
 		String decrypted = null;
 		try {
-			decrypted = new String(decrypt(CIPHERMODEPADDING, skforAES, IV, s), ENCODING);
+			decrypted = new String(decrypt(CIPHERMODEPADDING, skforAES, iv, s), ENCODING);
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			logger.error("unspported encoding exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("unspported encoding exception", e);
 		}
 		return decrypted;
 	}
 
-	private byte[] encrypt(String cmp, SecretKey sk, IvParameterSpec IV, String msg) {
+	private static byte[] encrypt(String cmp, SecretKey sk, IvParameterSpec iv, String msg) {
 		try {
 			Cipher c = Cipher.getInstance(cmp);
-			c.init(Cipher.ENCRYPT_MODE, sk, IV);
+			c.init(Cipher.ENCRYPT_MODE, sk, iv);
 			return c.doFinal(msg.getBytes(ENCODING));
 		} catch (NoSuchAlgorithmException nsae) {
-			System.out.println("no cipher getinstance support for " + cmp);
+			logger.error("no cipher getinstance support for " + cmp, nsae);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("no cipher getinstance support for " + cmp, nsae);
 		} catch (NoSuchPaddingException nspe) {
-			System.out.println("no cipher getinstance support for padding " + cmp);
+			logger.error("no cipher getinstance support for padding " + cmp, nspe);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("no cipher getinstance support for " + cmp, nspe);
 		} catch (InvalidKeyException e) {
-			System.out.println("invalid key exception");
+			logger.error("invalid key exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("invalid key exception", e);
 		} catch (InvalidAlgorithmParameterException e) {
-			System.out.println("invalid algorithm parameter exception");
+			logger.error("invalid algorithm parameter exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("invalid algorithm parameter exception", e);
 		} catch (IllegalBlockSizeException e) {
-			System.out.println("illegal block size exception");
+			logger.error("illegal block size exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("illegal block size exception", e);
 		} catch (BadPaddingException e) {
-			System.out.println("bad padding exception");
+			logger.error("bad padding exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("bad padding exception", e);
 		} catch (UnsupportedEncodingException e) {
-			System.out.println("unsupported Encoding Exception");
+			logger.error("unsupported Encoding Exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("unsupported Encoding Exception", e);
 		}
-		return null;
 	}
 
-	private byte[] decrypt(String cmp, SecretKey sk, IvParameterSpec IV, byte[] ciphertext) {
+	private static byte[] decrypt(String cmp, SecretKey sk, IvParameterSpec iv, byte[] ciphertext) {
 		try {
 			Cipher c = Cipher.getInstance(cmp);
-			c.init(Cipher.DECRYPT_MODE, sk, IV);
+			c.init(Cipher.DECRYPT_MODE, sk, iv);
 			return c.doFinal(ciphertext);
 		} catch (NoSuchAlgorithmException nsae) {
-			System.out.println("no cipher getinstance support for " + cmp);
+			logger.error("no cipher getinstance support for " + cmp, nsae);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("no cipher getinstance support for " + cmp, nsae);
 		} catch (NoSuchPaddingException nspe) {
-			System.out.println("no cipher getinstance support for padding " + cmp);
+			logger.error("no cipher getinstance support for padding " + cmp, nspe);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("no cipher getinstance support for " + cmp, nspe);
 		} catch (InvalidKeyException e) {
-			System.out.println("invalid key exception");
+			logger.error("invalid key exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("invalid key exception", e);
 		} catch (InvalidAlgorithmParameterException e) {
-			System.out.println("invalid algorithm parameter exception");
+			logger.error("invalid algorithm parameter exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("invalid algorithm parameter exception", e);
 		} catch (IllegalBlockSizeException e) {
-			System.out.println("illegal block size exception");
+			logger.error("illegal block size exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("illegal block size exception", e);
 		} catch (BadPaddingException e) {
-			System.out.println("bad padding exception");
+			logger.error("bad padding exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("bad padding exception", e);
 		}
-		return null;
+	}
+
+	/**
+	 * 静态方法，加密字符串
+	 * 
+	 * @param plaintext
+	 *            原字符串
+	 * @param passphrase
+	 *            密钥
+	 * @return 加密并Base64的字符串
+	 */
+	public static String encrypt(String plaintext, String passphrase) {
+		if (passphrase == null || passphrase.length() < 1) {
+			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
+		}
+		SecretKey sk = null;
+		SecretKeySpec skforAES = null;
+		IvParameterSpec iv = null;
+		PBEKeySpec myKeyspec = null;
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+		if (passphrase == null || passphrase.length() < 1) {
+			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
+		}
+
+		try {
+			myKeyspec = new PBEKeySpec(passphrase.toCharArray(), SALT, HASH_ITERATIONS, KEY_LENGTH);
+			sk = keyfactory.generateSecret(myKeyspec);
+			byte[] skAsByteArray = sk.getEncoded();
+			skforAES = new SecretKeySpec(skAsByteArray, "AES");
+			iv = new IvParameterSpec(IV);
+		} catch (InvalidKeySpecException ikse) {
+			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
+		}
+		byte[] ciphertext = encrypt(CIPHERMODEPADDING, skforAES, iv, plaintext);
+		String base64_ciphertext = Base64Encoder.encodeFromBytes(ciphertext);
+		return base64_ciphertext;
+	}
+
+	/**
+	 * 静态方法，解密字符串
+	 * 
+	 * @param ciphertext_base64
+	 *            Base64加密的字符串
+	 * @param passphrase
+	 *            密钥
+	 * @return 解密的字符串
+	 */
+	public static String decrypt(String ciphertext_base64, String passphrase) {
+		if (passphrase == null || passphrase.length() < 1) {
+			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
+		}
+		SecretKey sk = null;
+		SecretKeySpec skforAES = null;
+		IvParameterSpec iv = null;
+		PBEKeySpec myKeyspec = null;
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+
+		if (passphrase == null || passphrase.length() < 1) {
+			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
+		}
+
+		try {
+			myKeyspec = new PBEKeySpec(passphrase.toCharArray(), SALT, HASH_ITERATIONS, KEY_LENGTH);
+			sk = keyfactory.generateSecret(myKeyspec);
+			byte[] skAsByteArray = sk.getEncoded();
+			skforAES = new SecretKeySpec(skAsByteArray, "AES");
+			iv = new IvParameterSpec(IV);
+		} catch (InvalidKeySpecException ikse) {
+			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
+		}
+		byte[] s = Base64Decoder.decodeToBytes(ciphertext_base64);
+		String decrypted = null;
+		try {
+			decrypted = new String(decrypt(CIPHERMODEPADDING, skforAES, iv, s), ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("unspported encoding exception", e);
+			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
+			throw new ChainUtilsRuntimeException("unspported encoding exception", e);
+		}
+		return decrypted;
 	}
 
 	/**
 	 * 返回新的实例
 	 * 
+	 * @param passphrase
+	 *            密码
 	 * @return 实例
 	 */
-	public static AESUtils getInstance() {
-		return new AESUtils();
+	public static AESUtils getInstance(String passphrase) {
+		return new AESUtils(passphrase);
 	}
 
 }

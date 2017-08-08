@@ -34,15 +34,11 @@ public class CookieUtils {
 	 *            cookie生命周期 以秒为单位
 	 */
 	public static void addCookie(HttpServletResponse response, String path, String name, String value, int maxAge) {
-		try {
-			Cookie cookie = new Cookie(name, value);
-			if (maxAge > 0)
-				cookie.setMaxAge(maxAge);
-			cookie.setPath(path);
-			response.addCookie(cookie);
-		} catch (Exception ex) {
-			logger.error("创建Cookies发生异常!", ex);
-		}
+		Cookie cookie = new Cookie(name, value);
+		if (maxAge > 0)
+			cookie.setMaxAge(maxAge);
+		cookie.setPath(path);
+		response.addCookie(cookie);
 	}
 
 	/**
@@ -64,20 +60,16 @@ public class CookieUtils {
 		Cookie[] cookies = request.getCookies();
 		if (null == cookies || cookies.length == 0)
 			return bool;
-		try {
-			for (int i = 0; i < cookies.length; i++) {
-				if (cookies[i].getName().equals(name)) {
-					Cookie cookie = new Cookie(name, null);
-					cookie.setMaxAge(0);
-					cookie.setPath(path);// 根据你创建cookie的路径进行填写
-					response.addCookie(cookie);
-					bool = true;
-				} else {
-					response.addCookie(cookies[i]);
-				}
+		for (int i = 0; i < cookies.length; i++) {
+			if (cookies[i].getName().equals(name)) {
+				Cookie cookie = new Cookie(name, null);
+				cookie.setMaxAge(0);
+				cookie.setPath(path);// 根据你创建cookie的路径进行填写
+				response.addCookie(cookie);
+				bool = true;
+			} else {
+				response.addCookie(cookies[i]);
 			}
-		} catch (Exception ex) {
-			logger.error("清空Cookies发生异常!", ex);
 		}
 		return bool;
 	}
@@ -101,19 +93,15 @@ public class CookieUtils {
 		Cookie[] cookies = request.getCookies();
 		if (null == cookies || cookies.length == 0)
 			return bool;
-		try {
-			for (int i = 0; i < cookies.length; i++) {
-				String name = cookies[i].getName();
-				Cookie cookie = new Cookie(name, null);
-				cookie.setMaxAge(0);
-				cookie.setPath(path);// 根据你创建cookie的路径进行填写
-				cookie.setDomain(domain);
-				response.addCookie(cookie);
-			}
-			bool = true;
-		} catch (Exception ex) {
-			logger.error("清空Cookies发生异常!", ex);
+		for (int i = 0; i < cookies.length; i++) {
+			String name = cookies[i].getName();
+			Cookie cookie = new Cookie(name, null);
+			cookie.setMaxAge(0);
+			cookie.setPath(path);// 根据你创建cookie的路径进行填写
+			cookie.setDomain(domain);
+			response.addCookie(cookie);
 		}
+		bool = true;
 		return bool;
 	}
 
@@ -130,16 +118,12 @@ public class CookieUtils {
 		Cookie[] cookies = request.getCookies();
 		if (null == cookies || cookies.length == 0)
 			return null;
-		try {
-			for (int i = 0; i < cookies.length; i++) {
-				Cookie cookie = cookies[i];
-				String cname = cookie.getName();
-				if (cname.equals(name)) {
-					return cookie;
-				}
+		for (int i = 0; i < cookies.length; i++) {
+			Cookie cookie = cookies[i];
+			String cname = cookie.getName();
+			if (cname.equals(name)) {
+				return cookie;
 			}
-		} catch (Exception ex) {
-			logger.error("获取Cookies发生异常!", ex);
 		}
 		return null;
 	}

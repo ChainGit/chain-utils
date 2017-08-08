@@ -5,6 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * 
  * 产生随机<b>不重复</b>的整型数组
@@ -14,6 +19,8 @@ import java.util.Random;
  *
  */
 public class RandomIntegerArrayUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(RandomIntegerArrayUtils.class);
 
 	/**
 	 * 随机指定范围内N个不重复的数 利用List中contains方法
@@ -43,7 +50,7 @@ public class RandomIntegerArrayUtils {
 
 	private static void checkArgs(int min, int max, int n) {
 		if (n > (max - min + 1) || max < min || n < 1)
-			throw new RuntimeException("n should smaller than (max - min + 1) and (max >= min) and (n>0)");
+			throw new ChainUtilsRuntimeException("n should smaller than (max - min + 1) and (max >= min) and (n>0)");
 	}
 
 	/**

@@ -1,26 +1,24 @@
-package com.chain.utils;
+package com.chain.update;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.chain.exception.ChainUtilsRuntimeException;
+import java.security.MessageDigest;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedInputStream;
 
 /**
- * 文件和文件夹工具类
+ * 只用于ChainUtilsUpdate
  * 
  * @author Chain Qian
  * @version 1.0
  *
  */
-public class FileDirectoryUtils {
-
-	private static final Logger logger = LoggerFactory.getLogger(FileDirectoryUtils.class);
+public class ChainUtilsUpdateUtils {
 
 	/**
 	 * 移动文件（注意读写权限）<br>
@@ -34,15 +32,13 @@ public class FileDirectoryUtils {
 	 *            源文件路径
 	 * @param toFilePath
 	 *            目的文件路径
-	 * @throws IOException
-	 *             异常
 	 */
-	public static void moveFile(File srcFilePath, File toFilePath) throws IOException {
+	public void moveFile(File srcFilePath, File toFilePath) {
 		copyFile(srcFilePath, toFilePath);
 		srcFilePath.delete();
 	}
 
-	public static void moveFile(String srcFilePath, String toFilePath) throws IOException {
+	public void moveFile(String srcFilePath, String toFilePath) {
 		copyFile(new File(srcFilePath), new File(toFilePath));
 		new File(srcFilePath).delete();
 	}
@@ -59,10 +55,8 @@ public class FileDirectoryUtils {
 	 *            源文件路径
 	 * @param toFilePath
 	 *            目的文件路径
-	 * @throws IOException
-	 *             异常
 	 */
-	public static void copyFile(File srcFilePath, File toFilePath) throws IOException {
+	public void copyFile(File srcFilePath, File toFilePath) {
 		FileInputStream fi = null;
 		FileOutputStream fo = null;
 		FileChannel in = null;
@@ -74,8 +68,7 @@ public class FileDirectoryUtils {
 			out = fo.getChannel();// 得到对应的文件通道
 			in.transferTo(0, in.size(), out);// 连接两个通道，并且从in通道读取，然后写入out通道
 		} catch (IOException e) {
-			logger.error("io exception", e);
-			throw e;
+			e.printStackTrace();
 		} finally {
 			try {
 				fi.close();
@@ -83,13 +76,12 @@ public class FileDirectoryUtils {
 				fo.close();
 				out.close();
 			} catch (IOException e) {
-				logger.error("io exception", e);
-				throw new ChainUtilsRuntimeException("io exception", e);
+				e.printStackTrace();
 			}
 		}
 	}
 
-	public static void copyFile(String srcFilePath, String toFilePath) throws IOException {
+	public void copyFile(String srcFilePath, String toFilePath) {
 		copyFile(new File(srcFilePath), new File(toFilePath));
 	}
 
@@ -107,7 +99,7 @@ public class FileDirectoryUtils {
 	 * @throws IOException
 	 *             异常
 	 */
-	public static void moveDirectory(String from, String to) throws IOException {
+	public void moveDirectory(String from, String to) throws IOException {
 		copyDirectory(from, to);
 		deleteDirectory(from);
 	}
@@ -125,7 +117,7 @@ public class FileDirectoryUtils {
 	 * @throws IOException
 	 *             异常
 	 */
-	public static void copyDirectory(String from, String to) throws IOException {
+	public void copyDirectory(String from, String to) throws IOException {
 		File src = new File(from);
 		File dest = new File(to);
 		if (src.isDirectory()) {
@@ -148,7 +140,7 @@ public class FileDirectoryUtils {
 	 * @param fileName
 	 *            文件
 	 */
-	public static void deleteFile(String fileName) {
+	public void deleteFile(String fileName) {
 		File file = new File(fileName);
 		file.delete();
 	}
@@ -159,7 +151,7 @@ public class FileDirectoryUtils {
 	 * @param file
 	 *            文件夹
 	 */
-	public static void deleteDirectory(File file) {
+	public void deleteDirectory(File file) {
 		emptyDirectory(file);
 		file.delete();
 	}
@@ -170,7 +162,7 @@ public class FileDirectoryUtils {
 	 * @param dir
 	 *            文件夹
 	 */
-	public static void deleteDirectory(String dir) {
+	public void deleteDirectory(String dir) {
 		File file = new File(dir);
 		deleteDirectory(file);
 		file.delete();
@@ -182,7 +174,7 @@ public class FileDirectoryUtils {
 	 * @param file
 	 *            文件夹
 	 */
-	public static void emptyDirectory(File file) {
+	public void emptyDirectory(File file) {
 		if (file != null && file.exists()) {
 			if (file.isDirectory()) {
 				File[] files = file.listFiles();
@@ -192,6 +184,55 @@ public class FileDirectoryUtils {
 			} else {
 				file.delete();
 			}
+		}
+	}
+
+	/**
+	 * 获得实例
+	 * 
+	 * @return 实例
+	 */
+	public static ChainUtilsUpdateUtils getInstance() {
+		return new ChainUtilsUpdateUtils();
+	}
+
+	public static final String MD5 = "MD5";
+	public static final String SHA1 = "SHA1";
+	public static final String CRC32 = "CRC32";
+
+	/**
+	 * 校验文件，并获得校验结果(也是加密文件)
+	 * 
+	 * @param type
+	 *            校验类型
+	 * @param filePath
+	 *            文件路径
+	 * @return 校验字符串（加密字符串）
+	 * @throws Exception
+	 *             异常
+	 */
+	public static String verify(String type, String filePath) throws Exception {
+		CheckedInputStream cis = null;
+		File file = new File(filePath);
+		if (CRC32.equals(type)) {
+			cis = new CheckedInputStream(new FileInputStream(file), new CRC32());
+			byte[] bytes = new byte[1024 * 8];
+			while (cis.read(bytes) != -1)
+				;
+			long res = cis.getChecksum().getValue();
+			cis.close();
+			return Long.toHexString(res);
+		} else {
+			String value = null;
+			FileInputStream is = null;
+			is = new FileInputStream(filePath);
+			MappedByteBuffer byteBuffer = is.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+			MessageDigest md5 = MessageDigest.getInstance(type);
+			md5.update(byteBuffer);
+			BigInteger bi = new BigInteger(1, md5.digest());
+			value = bi.toString(16);
+			is.close();
+			return value;
 		}
 	}
 

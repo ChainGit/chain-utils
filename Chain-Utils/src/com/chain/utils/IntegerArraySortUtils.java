@@ -1,5 +1,7 @@
 package com.chain.utils;
 
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * 
  * 一些常见的排序算法，包括<i>插入排序，选择排序，冒泡排序，希尔排序，快速排序，交换元素</i>
@@ -65,12 +67,12 @@ public class IntegerArraySortUtils {
 
 	private static void checkSwapArgs(int[] n, int i, int j) {
 		if (i < 0 || j > n.length - 1)
-			throw new RuntimeException("index is illegal");
+			throw new ChainUtilsRuntimeException("index is illegal");
 	}
 
 	private static void checkArray(int[] a) {
 		if (a == null || a.length < 1)
-			throw new RuntimeException("array is null or empty");
+			throw new ChainUtilsRuntimeException("array is null or empty");
 	}
 
 	/**

@@ -5,6 +5,8 @@ import java.math.BigInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * 进制转换工具类<br>
  * 
@@ -133,7 +135,7 @@ public class ScaleConvertUtils {
 			}
 			return null;
 		} catch (Exception e) {
-			logger.error("parseStrin错误", e);
+			logger.error("parseString exception", e);
 			throw e;
 		}
 	}
@@ -221,7 +223,7 @@ public class ScaleConvertUtils {
 		// 注意负号、点号都需要使用双个斜杠转换，单引号单个斜杠转换
 		String reg = "^[\\-]{0,1}[0-9A-Z]*";
 		if (!src.matches(reg))
-			throw new RuntimeException("format of this string is not correct");
+			throw new ChainUtilsRuntimeException("format of this string is not correct");
 	}
 
 	/**
@@ -355,7 +357,8 @@ public class ScaleConvertUtils {
 				String s = toString(ival, scale);
 				sb.append(s).reverse();
 			} catch (Exception e) {
-				logger.error("floatPointNumberMethod错误", e);
+				logger.error("floatPointNumberMethod exception", e);
+				throw new ChainUtilsRuntimeException("floatPointNumberMethod exception", e);
 			}
 		} else if (obj instanceof Double) {
 			double value = (Double) obj;
@@ -366,7 +369,8 @@ public class ScaleConvertUtils {
 				String s = toString(ival, scale);
 				sb.append(s).reverse();
 			} catch (Exception e) {
-				logger.error("floatPointNumberMethod错误2", e);
+				logger.error("floatPointNumberMethod exception 2", e);
+				throw new ChainUtilsRuntimeException("floatPointNumberMethod exception 2", e);
 			}
 		}
 		return sb;
@@ -564,7 +568,7 @@ public class ScaleConvertUtils {
 	 */
 	private static void isNumber(Object obj) {
 		if (obj == null || !(obj instanceof Number))
-			throw new RuntimeException("object should be a number.");
+			throw new ChainUtilsRuntimeException("object should be a number.");
 	}
 
 	/**
@@ -575,7 +579,7 @@ public class ScaleConvertUtils {
 	 */
 	private static void checkScale(int scale) {
 		if (scale < 2 || scale > 36)
-			throw new RuntimeException("scale is between 2 and 36.");
+			throw new ChainUtilsRuntimeException("scale is between 2 and 36.");
 	}
 
 	/**
@@ -587,7 +591,7 @@ public class ScaleConvertUtils {
 		try {
 			return clz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
-			logger.error("getInstance错误", e);
+			logger.error("getInstance exception", e);
 		}
 		return new ScaleConvertUtils();
 	}

@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -17,17 +18,28 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.chain.exception.ChainUtilsRuntimeException;
 
 /**
  * 非对称加密算法RSA
  * 
  * @author Collected
- * @version 1.0
+ * @version 1.1
  * 
  * 
  */
 public class RSAUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(RSAUtils.class);
+
 	/** 指定加密算法为RSA */
 	private static final String ALGORITHM = "RSA";
 	/** 密钥长度，用来初始化 */
@@ -40,8 +52,6 @@ public class RSAUtils {
 	private String publicKeyString = null;
 	/** 私钥字符串 */
 	private String privateKeyString = null;
-	/** 指定字符集 */
-	private static final String CHARSET = "UTF-8";
 
 	/**
 	 * RSA最大加密明文大小
@@ -52,18 +62,44 @@ public class RSAUtils {
 	 */
 	private static final int MAX_DECRYPT_BLOCK = 128;
 
+	public RSAUtils(Key publicKey, Key privateKey) {
+		this.publicKey = publicKey;
+		this.privateKey = privateKey;
+		this.publicKeyString = toKeyString(publicKey);
+		this.privateKeyString = toKeyString(privateKey);
+	}
+
+	public RSAUtils(String publicKeyString, String privateKeyString) {
+		this.publicKeyString = publicKeyString;
+		this.privateKeyString = privateKeyString;
+		this.privateKey = generatePublicKey(publicKeyString);
+		this.publicKey = generatePrivateKey(privateKeyString);
+	}
+
+	public static RSAUtils getInstance(Key publicKey, Key privateKey) {
+		return new RSAUtils(publicKey, privateKey);
+	}
+
+	public static RSAUtils getInstance(String publicKeyString, String privateKeyString) {
+		return new RSAUtils(publicKeyString, privateKeyString);
+	}
+
 	/**
 	 * 生成随机的公钥和私钥KEY密钥对，公钥KEY为第一个，私钥KEY为第二个
 	 * 
-	 * @throws Exception
-	 *             异常
 	 * @return 密钥对
 	 */
-	public static Key[] generateRandomKeyPair() throws Exception {
+	public static Key[] generateRandomKeyPair() {
 		// /** RSA算法要求有一个可信任的随机数源 */
 		SecureRandom secureRandom = new SecureRandom();
 		/** 为RSA算法创建一个KeyPairGenerator对象 */
-		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
+		KeyPairGenerator keyPairGenerator = null;
+		try {
+			keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("no such algorithm exception", e);
+			throw new ChainUtilsRuntimeException("no such algorithm exception", e);
+		}
 		/** 利用上面的随机数据源初始化这个KeyPairGenerator对象 */
 		keyPairGenerator.initialize(KEYSIZE, secureRandom);
 		/** 生成密匙对 */
@@ -79,10 +115,8 @@ public class RSAUtils {
 	 * 生成随机的公钥和私钥KEY密钥对的字符串，公钥KEY为第一个，私钥KEY为第二个
 	 * 
 	 * @return 密钥对字符串
-	 * @throws Exception
-	 *             异常
 	 */
-	public static String[] generateRandomKeyPairString() throws Exception {
+	public static String[] generateRandomKeyPairString() {
 		Key[] keys = generateRandomKeyPair();
 		return new String[] { toKeyString(keys[0]), toKeyString(keys[1]) };
 	}
@@ -95,10 +129,8 @@ public class RSAUtils {
 	 * @param privateKeyStr
 	 *            私钥字符串
 	 * @return 密钥对字符串
-	 * @throws Exception
-	 *             异常
 	 */
-	public static String[] generateKeyPairString(String publicKeyStr, String privateKeyStr) throws Exception {
+	public static String[] generateKeyPairString(String publicKeyStr, String privateKeyStr) {
 		Key[] keys = generateKeyPair(publicKeyStr, privateKeyStr);
 		return new String[] { toKeyString(keys[0]), toKeyString(keys[1]) };
 	}
@@ -111,10 +143,8 @@ public class RSAUtils {
 	 * @param privateKeyStr
 	 *            私钥字符串
 	 * @return 密钥对
-	 * @throws Exception
-	 *             异常
 	 */
-	public static Key[] generateKeyPair(String publicKeyStr, String privateKeyStr) throws Exception {
+	public static Key[] generateKeyPair(String publicKeyStr, String privateKeyStr) {
 		Key[] keys = new Key[2];
 		keys[0] = generatePublicKey(publicKeyStr);
 		keys[1] = generatePrivateKey(privateKeyStr);
@@ -122,45 +152,14 @@ public class RSAUtils {
 	}
 
 	/**
-	 * 生成公钥KEY对象
-	 * 
-	 * @param publicKeyStr
-	 *            公钥字符串
-	 * @throws Exception
-	 *             异常
-	 */
-	public void setPublicKey(String publicKeyStr) throws Exception {
-		publicKey = generatePublicKey(publicKeyStr);
-	}
-
-	/**
-	 * 生成私钥KEY对象
-	 * 
-	 * @param privateKeyStr
-	 *            私钥字符串
-	 * @throws Exception
-	 *             异常
-	 */
-	public void setPrivateKey(String privateKeyStr) throws Exception {
-		privateKey = generatePrivateKey(privateKeyStr);
-	}
-
-	/**
 	 * 从InputStream中加载公钥文件
 	 * 
 	 * @param in
 	 *            公钥输入流
-	 * @throws Exception
-	 *             加载公钥时产生的异常
 	 */
-	public void setPublicKey(InputStream in) throws Exception {
-		try {
-			publicKey = generatePublicKey(readKey(in));
-		} catch (IOException e) {
-			throw new Exception("公钥数据流读取错误");
-		} catch (NullPointerException e) {
-			throw new Exception("公钥输入流为空");
-		}
+	public void loadPublicKey(InputStream in) {
+		publicKey = generatePublicKey(readKey(in));
+
 	}
 
 	/**
@@ -168,17 +167,9 @@ public class RSAUtils {
 	 * 
 	 * @param in
 	 *            输入流
-	 * @throws Exception
-	 *             异常
 	 */
-	public void setPrivateKey(InputStream in) throws Exception {
-		try {
-			privateKey = generatePrivateKey(readKey(in));
-		} catch (IOException e) {
-			throw new Exception("私钥数据读取错误");
-		} catch (NullPointerException e) {
-			throw new Exception("私钥输入流为空");
-		}
+	public void loadPrivateKey(InputStream in) {
+		privateKey = generatePrivateKey(readKey(in));
 	}
 
 	/**
@@ -187,83 +178,26 @@ public class RSAUtils {
 	 * @param in
 	 *            输入流
 	 * @return 密钥字符串
-	 * @throws IOException
-	 *             异常
 	 */
-	private String readKey(InputStream in) throws IOException {
+	private String readKey(InputStream in) {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String readLine = null;
 		StringBuilder sb = new StringBuilder();
-		while ((readLine = br.readLine()) != null) {
-			if (readLine.charAt(0) == '-') {
-				continue;
-			} else {
-				sb.append(readLine);
-				sb.append('\r');
+		try {
+			while ((readLine = br.readLine()) != null) {
+				if (readLine.charAt(0) == '-') {
+					continue;
+				} else {
+					sb.append(readLine);
+					sb.append('\r');
+				}
 			}
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new ChainUtilsRuntimeException("io exception", e);
 		}
 
 		return sb.toString();
-	}
-
-	/**
-	 * 使用私钥KEY字符串加密
-	 * 
-	 * @param cryptoSrc
-	 *            原字符串
-	 * @param privatekey
-	 *            私钥
-	 * @return 加密的字符串
-	 * @throws Exception
-	 *             异常
-	 */
-	public String encryptByPrivateKeyString(String cryptoSrc, String privatekey) throws Exception {
-		return encryptByPrivateKey(cryptoSrc, generatePrivateKey(privatekey));
-	}
-
-	/**
-	 * 使用公钥KEY字符串解密
-	 * 
-	 * @param cryptoSrc
-	 *            加密的字符串
-	 * @param publickey
-	 *            公钥
-	 * @return 解密的字符串
-	 * @throws Exception
-	 *             异常
-	 */
-	public String decryptByPublicKeyString(String cryptoSrc, String publickey) throws Exception {
-		return decryptByPublicKey(cryptoSrc, generatePublicKey(publickey));
-	}
-
-	/**
-	 * 使用公钥KEY字符串加密
-	 * 
-	 * @param cryptoSrc
-	 *            原字符串
-	 * @param publickey
-	 *            公钥
-	 * @return 加密的字符串
-	 * @throws Exception
-	 *             异常
-	 */
-	public String encryptByPublicKeyString(String cryptoSrc, String publickey) throws Exception {
-		return encryptByPublicKey(cryptoSrc, generatePublicKey(publickey));
-	}
-
-	/**
-	 * 使用私钥KEY字符串解密
-	 * 
-	 * @param cryptoSrc
-	 *            加密的字符串
-	 * @param privatekey
-	 *            私钥
-	 * @return 解密的字符串
-	 * @throws Exception
-	 *             异常
-	 */
-	public String decryptByPrivateKeyString(String cryptoSrc, String privatekey) throws Exception {
-		return decryptByPrivateKey(cryptoSrc, generatePrivateKey(privatekey));
 	}
 
 	/**
@@ -271,17 +205,24 @@ public class RSAUtils {
 	 * 
 	 * @param cryptoSrc
 	 *            加密的字符串
-	 * @param privatekey
-	 *            私钥
 	 * @return 解密的字符串
-	 * @throws Exception
-	 *             异常
 	 */
-	public String decryptByPrivateKey(String cryptoSrc, Key privatekey) throws Exception {
+	public String decryptByPrivateKey(String cryptoSrc) {
 		/** 得到Cipher对象对已用公钥加密的数据进行RSA解密 */
-		Cipher cipher = Cipher.getInstance(ALGORITHM);
+		Cipher cipher;
+		try {
+			cipher = Cipher.getInstance(ALGORITHM);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("no such exception", e);
+			throw new ChainUtilsRuntimeException("no such exception", e);
+		}
 		// Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-		cipher.init(Cipher.DECRYPT_MODE, privatekey);
+		try {
+			cipher.init(Cipher.DECRYPT_MODE, privateKey);
+		} catch (InvalidKeyException e) {
+			logger.error("invalid key exception", e);
+			throw new ChainUtilsRuntimeException("invalid key exception", e);
+		}
 		byte[] encryptedData = Base64Decoder.decodeToBytes(cryptoSrc);
 
 		/** 执行解密操作 */
@@ -293,16 +234,31 @@ public class RSAUtils {
 		// 对数据分段解密
 		while (inputLen - offSet > 0) {
 			if (inputLen - offSet > MAX_DECRYPT_BLOCK) {
-				cache = cipher.doFinal(encryptedData, offSet, MAX_DECRYPT_BLOCK);
+				try {
+					cache = cipher.doFinal(encryptedData, offSet, MAX_DECRYPT_BLOCK);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			} else {
-				cache = cipher.doFinal(encryptedData, offSet, inputLen - offSet);
+				try {
+					cache = cipher.doFinal(encryptedData, offSet, inputLen - offSet);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			}
 			out.write(cache, 0, cache.length);
 			i++;
 			offSet = i * MAX_DECRYPT_BLOCK;
 		}
 		byte[] decryptedData = out.toByteArray();
-		out.close();
+		try {
+			out.close();
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new ChainUtilsRuntimeException("io exception", e);
+		}
 		return new String(decryptedData);
 	}
 
@@ -311,17 +267,24 @@ public class RSAUtils {
 	 * 
 	 * @param cryptoSrc
 	 *            解密的字符串
-	 * @param publickey
-	 *            公钥
 	 * @return 解密后的字符串
-	 * @throws Exception
-	 *             异常
 	 */
-	public String decryptByPublicKey(String cryptoSrc, Key publickey) throws Exception {
+	public String decryptByPublicKey(String cryptoSrc) {
 		/** 得到Cipher对象对已用公钥加密的数据进行RSA解密 */
 		// Cipher cipher = Cipher.getInstance(ALGORITHM);
-		Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-		cipher.init(Cipher.DECRYPT_MODE, publickey);
+		Cipher cipher;
+		try {
+			cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("no such exception", e);
+			throw new ChainUtilsRuntimeException("no such exception", e);
+		}
+		try {
+			cipher.init(Cipher.DECRYPT_MODE, publicKey);
+		} catch (InvalidKeyException e) {
+			logger.error("invalid key exception", e);
+			throw new ChainUtilsRuntimeException("invalid key exception", e);
+		}
 		byte[] encryptedData = Base64Decoder.decodeToBytes(cryptoSrc);
 		/** 执行解密操作 */
 
@@ -333,16 +296,31 @@ public class RSAUtils {
 		// 对数据分段解密
 		while (inputLen - offSet > 0) {
 			if (inputLen - offSet > MAX_DECRYPT_BLOCK) {
-				cache = cipher.doFinal(encryptedData, offSet, MAX_DECRYPT_BLOCK);
+				try {
+					cache = cipher.doFinal(encryptedData, offSet, MAX_DECRYPT_BLOCK);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			} else {
-				cache = cipher.doFinal(encryptedData, offSet, inputLen - offSet);
+				try {
+					cache = cipher.doFinal(encryptedData, offSet, inputLen - offSet);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			}
 			out.write(cache, 0, cache.length);
 			i++;
 			offSet = i * MAX_DECRYPT_BLOCK;
 		}
 		byte[] decryptedData = out.toByteArray();
-		out.close();
+		try {
+			out.close();
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new ChainUtilsRuntimeException("io exception", e);
+		}
 
 		return new String(decryptedData);
 	}
@@ -352,16 +330,23 @@ public class RSAUtils {
 	 * 
 	 * @param cryptoSrc
 	 *            原字符串
-	 * @param privatekey
-	 *            私钥
 	 * @return 加密的字符串
-	 * @throws Exception
-	 *             异常
 	 */
-	public String encryptByPrivateKey(String cryptoSrc, Key privatekey) throws Exception {
+	public String encryptByPrivateKey(String cryptoSrc) {
 		/** 得到Cipher对象来实现对源数据的RSA加密 */
-		Cipher cipher = Cipher.getInstance(ALGORITHM);
-		cipher.init(Cipher.ENCRYPT_MODE, privatekey);
+		Cipher cipher = null;
+		try {
+			cipher = Cipher.getInstance(ALGORITHM);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("no such exception", e);
+			throw new ChainUtilsRuntimeException("no such exception", e);
+		}
+		try {
+			cipher.init(Cipher.ENCRYPT_MODE, privateKey);
+		} catch (InvalidKeyException e) {
+			logger.error("invalid key exception", e);
+			throw new ChainUtilsRuntimeException("invalid key exception", e);
+		}
 		byte[] data = cryptoSrc.getBytes();
 		/** 执行数据分组加密操作 */
 		int inputLen = data.length;
@@ -372,17 +357,32 @@ public class RSAUtils {
 		// 对数据分段加密
 		while (inputLen - offSet > 0) {
 			if (inputLen - offSet > MAX_ENCRYPT_BLOCK) {
-				cache = cipher.doFinal(data, offSet, MAX_ENCRYPT_BLOCK);
+				try {
+					cache = cipher.doFinal(data, offSet, MAX_ENCRYPT_BLOCK);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			} else {
-				cache = cipher.doFinal(data, offSet, inputLen - offSet);
+				try {
+					cache = cipher.doFinal(data, offSet, inputLen - offSet);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			}
 			out.write(cache, 0, cache.length);
 			i++;
 			offSet = i * MAX_ENCRYPT_BLOCK;
 		}
 		byte[] encryptedData = out.toByteArray();
-		out.close();
-		return Base64Encoder.encode(encryptedData);
+		try {
+			out.close();
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new ChainUtilsRuntimeException("io exception", e);
+		}
+		return Base64Encoder.encodeFromBytes(encryptedData);
 	}
 
 	/**
@@ -390,38 +390,60 @@ public class RSAUtils {
 	 * 
 	 * @param cryptoSrc
 	 *            原字符串
-	 * @param publickey
-	 *            公钥
 	 * @return 解密的字符串
-	 * @throws Exception
-	 *             异常
 	 */
-	public String encryptByPublicKey(String cryptoSrc, Key publickey) throws Exception {
+	public String encryptByPublicKey(String cryptoSrc) {
 		/** 得到Cipher对象来实现对源数据的RSA加密 */
-		Cipher cipher = Cipher.getInstance(ALGORITHM);
-		cipher.init(Cipher.ENCRYPT_MODE, publickey);
+		Cipher cipher;
+		try {
+			cipher = Cipher.getInstance(ALGORITHM);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("no such exception", e);
+			throw new ChainUtilsRuntimeException("no such exception", e);
+		}
+		try {
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+		} catch (InvalidKeyException e) {
+			logger.error("invalid key exception", e);
+			throw new ChainUtilsRuntimeException("invalid key exception", e);
+		}
 		byte[] data = cryptoSrc.getBytes();
 		/** 执行分组加密操作 */
 		int inputLen = data.length;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		int offSet = 0;
-		byte[] cache;
+		byte[] cache = null;
 		int i = 0;
 		// 对数据分段加密
 		while (inputLen - offSet > 0) {
 			if (inputLen - offSet > MAX_ENCRYPT_BLOCK) {
-				cache = cipher.doFinal(data, offSet, MAX_ENCRYPT_BLOCK);
+				try {
+					cache = cipher.doFinal(data, offSet, MAX_ENCRYPT_BLOCK);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			} else {
-				cache = cipher.doFinal(data, offSet, inputLen - offSet);
+				try {
+					cache = cipher.doFinal(data, offSet, inputLen - offSet);
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					logger.error("exception", e);
+					throw new ChainUtilsRuntimeException("exception", e);
+				}
 			}
 			out.write(cache, 0, cache.length);
 			i++;
 			offSet = i * MAX_ENCRYPT_BLOCK;
 		}
 		byte[] encryptedData = out.toByteArray();
-		out.close();
+		try {
+			out.close();
+		} catch (IOException e) {
+			logger.error("io exception", e);
+			throw new ChainUtilsRuntimeException("io exception", e);
+		}
 
-		return Base64Encoder.encode(encryptedData);
+		return Base64Encoder.encodeFromBytes(encryptedData);
 	}
 
 	/**
@@ -430,10 +452,8 @@ public class RSAUtils {
 	 * @param publicKeyStr
 	 *            公钥字符串
 	 * @return 公钥对象
-	 * @throws Exception
-	 *             异常
 	 */
-	private static Key generatePublicKey(String publicKeyStr) throws Exception {
+	private static Key generatePublicKey(String publicKeyStr) {
 		String publicKeyString = publicKeyStr;
 		try {
 			byte[] buffer = Base64Decoder.decodeToBytes(publicKeyString);
@@ -442,13 +462,17 @@ public class RSAUtils {
 			Key publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpec);
 			return publicKey;
 		} catch (NoSuchAlgorithmException e) {
-			throw new Exception("无此算法");
+			logger.error("no such algorithm exception", e);
+			throw new ChainUtilsRuntimeException("no such algorithm exception", e);
 		} catch (InvalidKeySpecException e) {
-			throw new Exception("公钥非法");
+			logger.error("invalid key spec exception", e);
+			throw new ChainUtilsRuntimeException("invalid key spec exception", e);
 		} catch (NullPointerException e) {
-			throw new Exception("公钥数据为空");
+			logger.error("null pointer exception", e);
+			throw new ChainUtilsRuntimeException("null pointer exception", e);
 		} catch (Exception e) {
-			throw new Exception("公钥数据内容读取错误");
+			logger.error("exception", e);
+			throw new ChainUtilsRuntimeException("exception", e);
 		}
 	}
 
@@ -458,10 +482,8 @@ public class RSAUtils {
 	 * @param privateKeyStr
 	 *            私钥字符串
 	 * @return 返回
-	 * @throws Exception
-	 *             异常
 	 */
-	private static Key generatePrivateKey(String privateKeyStr) throws Exception {
+	private static Key generatePrivateKey(String privateKeyStr) {
 		String privateKeyString = privateKeyStr;
 		try {
 			byte[] buffer = Base64Decoder.decodeToBytes(privateKeyString);
@@ -470,13 +492,17 @@ public class RSAUtils {
 			Key privateKey = (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
 			return privateKey;
 		} catch (NoSuchAlgorithmException e) {
-			throw new Exception("无此算法");
+			logger.error("no such algorithm exception", e);
+			throw new ChainUtilsRuntimeException("no such algorithm exception", e);
 		} catch (InvalidKeySpecException e) {
-			throw new Exception("私钥非法");
+			logger.error("invalid key spec exception", e);
+			throw new ChainUtilsRuntimeException("invalid key spec exception", e);
 		} catch (NullPointerException e) {
-			throw new Exception("私钥数据为空");
+			logger.error("null pointer exception", e);
+			throw new ChainUtilsRuntimeException("null pointer exception", e);
 		} catch (Exception e) {
-			throw new Exception("私钥数据内容读取错误");
+			logger.error("exception", e);
+			throw new ChainUtilsRuntimeException("exception", e);
 		}
 	}
 
@@ -524,7 +550,75 @@ public class RSAUtils {
 	 * @return Key字符串形式
 	 */
 	public static String toKeyString(Key key) {
-		return new String(Base64Encoder.encode(key.getEncoded()));
+		return new String(Base64Encoder.encodeFromBytes(key.getEncoded()));
+	}
+
+	private RSAUtils() {
+
+	}
+
+	/**
+	 * 由公钥加密
+	 * 
+	 * @param cryptoSrc
+	 *            明文
+	 * @param publicKey
+	 *            公钥
+	 * @return 密文
+	 */
+	public static String encryptByPublicKey(String cryptoSrc, Key publicKey) {
+		RSAUtils rsa = new RSAUtils();
+		rsa.publicKey = publicKey;
+		rsa.publicKeyString = toKeyString(publicKey);
+		return rsa.encryptByPublicKey(cryptoSrc);
+	}
+
+	/**
+	 * 由公钥解密
+	 * 
+	 * @param cryptoSrc
+	 *            密文
+	 * @param publicKey
+	 *            公钥
+	 * @return 明文
+	 */
+	public static String decryptByPublicKey(String cryptoSrc, Key publicKey) {
+		RSAUtils rsa = new RSAUtils();
+		rsa.publicKey = publicKey;
+		rsa.publicKeyString = toKeyString(publicKey);
+		return rsa.decryptByPublicKey(cryptoSrc);
+	}
+
+	/**
+	 * 由私钥加密
+	 * 
+	 * @param cryptoSrc
+	 *            明文
+	 * @param privateKey
+	 *            私钥
+	 * @return 密文
+	 */
+	public static String encryptByPrivateKey(String cryptoSrc, Key privateKey) {
+		RSAUtils rsa = new RSAUtils();
+		rsa.privateKey = privateKey;
+		rsa.privateKeyString = toKeyString(privateKey);
+		return rsa.encryptByPrivateKey(cryptoSrc);
+	}
+
+	/**
+	 * 由私钥解密
+	 * 
+	 * @param cryptoSrc
+	 *            密文
+	 * @param privateKey
+	 *            私钥
+	 * @return 明文
+	 */
+	public static String decryptByPrivateKey(String cryptoSrc, Key privateKey) {
+		RSAUtils rsa = new RSAUtils();
+		rsa.privateKey = privateKey;
+		rsa.privateKeyString = toKeyString(privateKey);
+		return rsa.decryptByPrivateKey(cryptoSrc);
 	}
 
 }

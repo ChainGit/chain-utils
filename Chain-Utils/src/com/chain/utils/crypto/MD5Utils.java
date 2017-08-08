@@ -3,6 +3,11 @@ package com.chain.utils.crypto;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * MD5加密，生成MD5字符串(32位)
  * 
@@ -12,10 +17,12 @@ import java.security.NoSuchAlgorithmException;
  */
 public class MD5Utils {
 
+	private static final Logger logger = LoggerFactory.getLogger(MD5Utils.class);
+
 	private final static String[] strDigits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
 			"e", "f" };
 
-	private String byteToArrayString(byte bByte) {
+	private static String byteToArrayString(byte bByte) {
 		int iRet = bByte;
 		// System.out.println("iRet="+iRet);
 		if (iRet < 0) {
@@ -36,7 +43,7 @@ public class MD5Utils {
 		return String.valueOf(iRet);
 	}
 
-	private String byteToString(byte[] bByte) {
+	private static String byteToString(byte[] bByte) {
 		StringBuffer sBuffer = new StringBuffer();
 		for (int i = 0; i < bByte.length; i++) {
 			sBuffer.append(byteToArrayString(bByte[i]));
@@ -51,14 +58,15 @@ public class MD5Utils {
 	 *            原字符串
 	 * @return 加密字符串
 	 */
-	public String encode(String strObj) {
+	public static String encrypt(String strObj) {
 		String resultString = null;
 		try {
 			resultString = new String(strObj);
 			MessageDigest md = MessageDigest.getInstance("MD5");
 			resultString = byteToString(md.digest(strObj.getBytes()));
 		} catch (NoSuchAlgorithmException ex) {
-			ex.printStackTrace();
+			logger.error("no such algorithm exception", ex);
+			throw new ChainUtilsRuntimeException("no such algorithm exception", ex);
 		}
 		return resultString;
 	}

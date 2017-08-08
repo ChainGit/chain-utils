@@ -25,8 +25,10 @@ public class ObjectSerializeUtils {
 	 * @param orig
 	 *            要复制的对象
 	 * @return 复制的对象
+	 * @throws Exception
+	 *             异常
 	 */
-	public static Object copy(Object orig) {
+	public static Object copy(Object orig) throws Exception {
 		Object obj = null;
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -38,7 +40,8 @@ public class ObjectSerializeUtils {
 			ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
 			obj = in.readObject();
 		} catch (Exception e) {
-			logger.error("copy错误", e);
+			logger.error("copy exception", e);
+			throw e;
 		}
 		return obj;
 	}

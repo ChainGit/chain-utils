@@ -1,5 +1,7 @@
 package com.chain.test;
 
+import java.security.Key;
+
 import org.junit.Test;
 
 import com.chain.utils.crypto.AESUtils;
@@ -13,11 +15,12 @@ public class CryptoUtilsTest {
 
 	private static final String text = "ABCD1234";
 
+	private static final String KEY = "123456";
+
 	// MD5测试
 	@Test
 	public void test1() {
-		MD5Utils md5 = new MD5Utils();
-		String enstr = md5.encode(text);
+		String enstr = MD5Utils.encrypt(text);
 		System.out.println(enstr);
 		System.out.println(enstr.length());
 	}
@@ -25,10 +28,15 @@ public class CryptoUtilsTest {
 	// DES测试
 	@Test
 	public void test2() {
-		DESUtils des = new DESUtils();
-		String enstr = des.encode(text, "1", "A", "a");
+		DESUtils des = new DESUtils("1", "A", "a");
+		String enstr = des.encrypt(text);
 		System.out.println(enstr);
-		String destr = des.decode(enstr, "1", "A", "a");
+		String destr = des.decrypt(enstr);
+		System.out.println(destr);
+
+		enstr = DESUtils.encrypt(text, "1", "A", "a");
+		System.out.println(enstr);
+		destr = DESUtils.decrypt(enstr, "1", "A", "a");
 		System.out.println(destr);
 	}
 
@@ -44,33 +52,61 @@ public class CryptoUtilsTest {
 	// AES测试
 	@Test
 	public void test4() {
-		AESUtils aes = new AESUtils();
-		String enstr = aes.encrypt(text, "123456");
+		AESUtils aes = new AESUtils(KEY);
+		String enstr = aes.encrypt(text);
 		System.out.println(enstr);
-		String destr = aes.decrypt(enstr, "123456");
+		String destr = aes.decrypt(enstr);
+		System.out.println(destr);
+
+		enstr = AESUtils.encrypt(text, KEY);
+		System.out.println(enstr);
+		destr = AESUtils.decrypt(enstr, KEY);
 		System.out.println(destr);
 	}
 
 	// RSA测试
 	@Test
 	public void test5() throws Exception {
-		RSAUtils rsa = new RSAUtils();
 		String[] keys = RSAUtils.generateRandomKeyPairString();
-		String publickey = keys[0];
-		String privatekey = keys[1];
+		String publicKeyString = keys[0];
+		String privateKeyString = keys[1];
+		RSAUtils rsa = new RSAUtils(publicKeyString, privateKeyString);
 
 		// System.out.println(publickey);
 		// System.out.println(privatekey);
 
-		String enstr1 = rsa.encryptByPublicKeyString(text, publickey);
+		String enstr1 = rsa.encryptByPublicKey(text);
 		System.out.println(enstr1);
-		String destr1 = rsa.decryptByPrivateKeyString(enstr1, privatekey);
+		String destr1 = rsa.decryptByPrivateKey(enstr1);
 		System.out.println(destr1);
 
-		String enstr2 = rsa.encryptByPrivateKeyString(text, privatekey);
+		String enstr2 = rsa.encryptByPrivateKey(text);
 		System.out.println(enstr2);
-		String destr2 = rsa.decryptByPublicKeyString(enstr2, publickey);
+		String destr2 = rsa.decryptByPublicKey(enstr2);
 		System.out.println(destr2);
+
+		Key[] keys2 = RSAUtils.generateKeyPair(publicKeyString, privateKeyString);
+		Key publickey = keys2[0];
+		Key privatekey = keys2[1];
+
+		enstr1 = RSAUtils.encryptByPublicKey(text, publickey);
+		System.out.println(enstr1);
+		destr1 = RSAUtils.decryptByPrivateKey(enstr1, privatekey);
+		System.out.println(destr1);
+
+		enstr2 = RSAUtils.encryptByPrivateKey(text, privatekey);
+		System.out.println(enstr2);
+		destr2 = RSAUtils.decryptByPublicKey(enstr2, publickey);
+		System.out.println(destr2);
+
+		// RSA时公钥加密，私钥解密；反过来，私钥加密，公钥解密
+		/*
+		 * String enstr3 = rsa.encryptByPublicKey(text); System.out.println(enstr3);
+		 * String destr3 = rsa.decryptByPublicKey(enstr3); System.out.println(destr3);
+		 * 
+		 * String enstr4 = rsa.encryptByPublicKey(text); System.out.println(enstr4);
+		 * String destr4 = rsa.decryptByPublicKey(enstr4); System.out.println(destr4);
+		 */
 	}
 
 }

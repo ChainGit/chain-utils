@@ -2,17 +2,20 @@
 
 必须：
 1、slf4j
-2、logback
 
 可选(部分功能)：
 1、servlet-api
-2、bcprov
-3、jmimemagic
-4、pinyin4j
+2、logback
+3、bcprov
+4、jmimemagic
+5、pinyin4j
 
 <hr/>
 
 <b>更新记录：</b>
+
+2017.08.08 - chain-utils-1.1.0:
+1、完善异常处理方式
 
 2017.08.07 - chain-utils-1.0.9：
 1、汉语转拼音

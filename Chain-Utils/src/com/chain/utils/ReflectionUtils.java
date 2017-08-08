@@ -13,6 +13,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * 反射工具类
  * 
@@ -38,7 +40,8 @@ public class ReflectionUtils {
 		try {
 			clz = Class.forName(className);
 		} catch (ClassNotFoundException e) {
-			logger.error("getClassByName错误", e);
+			logger.error("getClassByName exception", e);
+			throw new ChainUtilsRuntimeException("getClassByName exception", e);
 		}
 		return clz;
 	}
@@ -124,7 +127,8 @@ public class ReflectionUtils {
 		try {
 			obj = clz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
-			logger.error("getObjectByClass错误", e);
+			logger.error("getObjectByClass exception", e);
+			throw new ChainUtilsRuntimeException("getObjectByClass exception", e);
 		}
 		return obj;
 	}
@@ -156,7 +160,8 @@ public class ReflectionUtils {
 			setAccessible(m, true);
 			result = m.invoke(objToInvoke, methodParams);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			// e.printStackTrace();
+			logger.error("invoke method exception", e);
+			throw new ChainUtilsRuntimeException("invoke method exception", e);
 		}
 		return result;
 	}
@@ -216,7 +221,8 @@ public class ReflectionUtils {
 			setAccessible(f, true);
 			f.set(obj, value);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
-			logger.error("setField错误", e);
+			logger.error("setField exception", e);
+			throw new ChainUtilsRuntimeException("setField exception", e);
 		}
 		return obj;
 	}
@@ -266,7 +272,8 @@ public class ReflectionUtils {
 			obj = cs.newInstance(initArgs);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
-			logger.error("newInstanceByConstrutor错误", e);
+			logger.error("newInstanceByConstrutor exception", e);
+			throw new ChainUtilsRuntimeException("newInstanceByConstrutor exception", e);
 		}
 		return obj;
 	}

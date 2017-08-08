@@ -16,9 +16,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Properties;
 
-import com.chain.utils.FileDirectoryUtils;
-import com.chain.utils.FileVerifyUtils;
-
 /**
  * chain-utils更新类
  * 
@@ -74,7 +71,7 @@ public class ChainUtilsUpdate {
 		String currentVersion = localProp.getProperty("version");
 		String newVersionPath = dir + File.separator + currentVersion;
 		String latestVersionPath = dir + File.separator + "latest";
-		FileDirectoryUtils fdu = new FileDirectoryUtils();
+		ChainUtilsUpdateUtils fdu = new ChainUtilsUpdateUtils();
 		File newVersionDir = new File(newVersionPath);
 		if (newVersionDir.exists())
 			fdu.deleteDirectory(newVersionDir);
@@ -84,9 +81,10 @@ public class ChainUtilsUpdate {
 			fdu.emptyDirectory(latestVersionDir);
 		latestVersionDir.mkdirs();
 		File newestJar = new File(workPath + File.separator + "out" + File.separator + fullName);
-		FileDirectoryUtils.getInstance().copyFile(newestJar, new File(newVersionDir + File.separator + fullName));
+		ChainUtilsUpdateUtils.getInstance().copyFile(newestJar, new File(newVersionDir + File.separator + fullName));
 		String latestJar = baseName + "latest" + tailName;
-		FileDirectoryUtils.getInstance().copyFile(newestJar, new File(latestVersionPath + File.separator + latestJar));
+		ChainUtilsUpdateUtils.getInstance().copyFile(newestJar,
+				new File(latestVersionPath + File.separator + latestJar));
 		String historyTxt = workPath + File.separator + "src" + File.separator + "history.txt";
 		BufferedWriter bw = new BufferedWriter(new FileWriter(latestVersionPath + File.separator + "history.txt"));
 		BufferedReader br = new BufferedReader(new FileReader(historyTxt));
@@ -101,10 +99,10 @@ public class ChainUtilsUpdate {
 		// FileDirectoryUtils.getInstance().copyFile(historyTxt, latestVersionPath +
 		// File.separator + "history.txt");
 		String versionTxt = workPath + File.separator + "src" + File.separator + "version.txt";
-		FileDirectoryUtils.getInstance().copyFile(versionTxt, latestVersionPath + File.separator + "version.txt");
-		String md5 = FileVerifyUtils.verify(FileVerifyUtils.MD5, newestJar.getAbsolutePath());
-		String sha1 = FileVerifyUtils.verify(FileVerifyUtils.SHA1, newestJar.getAbsolutePath());
-		String crc32 = FileVerifyUtils.verify(FileVerifyUtils.CRC32, newestJar.getAbsolutePath());
+		ChainUtilsUpdateUtils.getInstance().copyFile(versionTxt, latestVersionPath + File.separator + "version.txt");
+		String md5 = ChainUtilsUpdateUtils.verify(ChainUtilsUpdateUtils.MD5, newestJar.getAbsolutePath());
+		String sha1 = ChainUtilsUpdateUtils.verify(ChainUtilsUpdateUtils.SHA1, newestJar.getAbsolutePath());
+		String crc32 = ChainUtilsUpdateUtils.verify(ChainUtilsUpdateUtils.CRC32, newestJar.getAbsolutePath());
 		BufferedOutputStream fos = new BufferedOutputStream(
 				new FileOutputStream(new File(latestVersionPath + File.separator + "version.txt"), true));
 		fos.write("\r\n".getBytes());
@@ -215,9 +213,9 @@ public class ChainUtilsUpdate {
 			String vcrc32 = version.getProperty("CRC32");
 			String vmd5 = version.getProperty("MD5");
 			String vsha1 = version.getProperty("SHA1");
-			String fcrc32 = FileVerifyUtils.verify(FileVerifyUtils.CRC32, filePath);
-			String fmd5 = FileVerifyUtils.verify(FileVerifyUtils.MD5, filePath);
-			String fsha1 = FileVerifyUtils.verify(FileVerifyUtils.SHA1, filePath);
+			String fcrc32 = ChainUtilsUpdateUtils.verify(ChainUtilsUpdateUtils.CRC32, filePath);
+			String fmd5 = ChainUtilsUpdateUtils.verify(ChainUtilsUpdateUtils.MD5, filePath);
+			String fsha1 = ChainUtilsUpdateUtils.verify(ChainUtilsUpdateUtils.SHA1, filePath);
 			if (vcrc32.equals(fcrc32) && vmd5.equals(fmd5) && vsha1.equals(fsha1))
 				isOk = true;
 		} catch (Exception e) {

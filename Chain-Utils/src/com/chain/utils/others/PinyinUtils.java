@@ -3,6 +3,8 @@ package com.chain.utils.others;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chain.exception.ChainUtilsException;
+
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -28,9 +30,11 @@ public class PinyinUtils {
 	 * @param chines
 	 *            汉字（字符串）
 	 * @return 拼音字母
+	 * @throws ChainUtilsException
+	 *             拼音转换错误
 	 */
-	public static String getPinyin(String chines) {
-		String pinyinName = "";
+	public static String getPinyin(String chines) throws ChainUtilsException {
+		String pinyinName = null;
 		char[] nameChar = chines.toCharArray();
 		HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();
 		defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);
@@ -40,7 +44,8 @@ public class PinyinUtils {
 				try {
 					pinyinName += PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat)[0];
 				} catch (BadHanyuPinyinOutputFormatCombination e) {
-					logger.error("拼音转换错误", e);
+					logger.error("pinyin convert exception " + chines, e);
+					throw new ChainUtilsException("pinyin convert exception " + chines, e);
 				}
 			} else {
 				pinyinName += nameChar[i];

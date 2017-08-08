@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -19,6 +20,8 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.chain.exception.ChainUtilsRuntimeException;
 
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
@@ -139,7 +142,7 @@ public class FileUpDownloadUtils {
 			reader.close();
 			reader = null;
 		} catch (Exception e) {
-			logger.error("表单上传错误!" + e);
+			logger.error("form upload exception", e);
 			throw e;
 		} finally {
 			if (conn != null) {
@@ -164,7 +167,10 @@ public class FileUpDownloadUtils {
 	 * @throws Exception
 	 *             异常
 	 */
-	public void download(String urlStr, String file) throws Exception {
+	public static void download(String urlStr, String file) throws Exception {
+		BufferedInputStream bis = null;
+		ByteArrayOutputStream baos = null;
+		BufferedOutputStream bos = null;
 		try {
 			URL url = new URL(urlStr);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -172,11 +178,11 @@ public class FileUpDownloadUtils {
 			conn.setConnectTimeout(5 * 1000);
 			conn.connect();
 			InputStream is = conn.getInputStream();
-			BufferedInputStream bis = new BufferedInputStream(is);
+			bis = new BufferedInputStream(is);
 			File f = new File(file);
 			if (f.exists())
 				f.delete();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			baos = new ByteArrayOutputStream();
 			byte[] buf = new byte[1024 * 8];
 			int len = -1;
 			while ((len = bis.read(buf)) != -1) {
@@ -187,23 +193,37 @@ public class FileUpDownloadUtils {
 			byte[] data = baos.toByteArray();
 			baos.close();
 
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+			bos = new BufferedOutputStream(new FileOutputStream(file));
 			bos.write(data);
 			bos.flush();
 			bos.close();
 		} catch (Exception e) {
-			logger.error("文件下载错误!", e);
+			logger.error("download file exception", e);
 			throw e;
-		}
-	}
+		} finally {
 
-	/**
-	 * 获得实例
-	 * 
-	 * @return 实例
-	 */
-	public static FileDirectoryUtils getInstance() {
-		return new FileDirectoryUtils();
+			try {
+				if (bos != null)
+					bos.close();
+			} catch (IOException e) {
+				logger.error("io exception", e);
+				throw new ChainUtilsRuntimeException("io exception", e);
+			}
+			try {
+				if (baos != null)
+					baos.close();
+			} catch (IOException e) {
+				logger.error("io exception", e);
+				throw new ChainUtilsRuntimeException("io exception", e);
+			}
+			try {
+				if (bis != null)
+					bis.close();
+			} catch (IOException e) {
+				logger.error("io exception", e);
+				throw new ChainUtilsRuntimeException("io exception", e);
+			}
+		}
 	}
 
 }

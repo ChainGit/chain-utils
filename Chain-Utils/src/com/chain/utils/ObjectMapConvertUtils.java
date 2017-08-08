@@ -58,7 +58,7 @@ public class ObjectMapConvertUtils {
 
 			return (T) obj;
 		} catch (Exception e) {
-			logger.error("map转为object错误", e);
+			logger.error("map convert object exception", e);
 			throw e;
 		}
 	}
@@ -93,7 +93,7 @@ public class ObjectMapConvertUtils {
 
 			return map;
 		} catch (Exception e) {
-			logger.error("object转为map错误", e);
+			logger.error("object convert map exception", e);
 			throw e;
 		}
 	}

@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * Base64加密
  * 
@@ -15,6 +20,8 @@ import java.io.UnsupportedEncodingException;
  */
 public class Base64Encoder extends FilterOutputStream {
 
+	private static final Logger logger = LoggerFactory.getLogger(Base64Encoder.class);
+
 	private static final char[] chars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
 			'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 			'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
@@ -23,22 +30,21 @@ public class Base64Encoder extends FilterOutputStream {
 	private int charCount;
 	private int carryOver;
 
-	/***
-	 * Constructs a new Base64 encoder that writes output to the given OutputStream.
-	 *
-	 * @param out
-	 *            the output stream
-	 */
 	public Base64Encoder(OutputStream out) {
 		super(out);
 	}
 
-	/***
-	 * Writes the given byte to the output stream in an encoded form.
-	 *
-	 * @exception IOException
-	 *                if an I/O error occurs
+	/**
+	 * 获得实例
+	 * 
+	 * @param out
+	 *            输出流
+	 * @return 实例
 	 */
+	public Base64Encoder getInstance(OutputStream out) {
+		return new Base64Encoder(out);
+	}
+
 	public void write(int b) throws IOException {
 		// Take 24-bits from three octets, translate into four encoded chars
 		// Break lines at 76 chars
@@ -81,18 +87,6 @@ public class Base64Encoder extends FilterOutputStream {
 		}
 	}
 
-	/***
-	 * Writes the given byte array to the output stream in an encoded form.
-	 *
-	 * @param buf
-	 *            the data to be written
-	 * @param off
-	 *            the start offset of the data
-	 * @param len
-	 *            the length of the data
-	 * @exception IOException
-	 *                if an I/O error occurs
-	 */
 	public void write(byte[] buf, int off, int len) throws IOException {
 		// This could of course be optimized
 		for (int i = 0; i < len; i++) {
@@ -100,13 +94,6 @@ public class Base64Encoder extends FilterOutputStream {
 		}
 	}
 
-	/***
-	 * Closes the stream, this MUST be called to ensure proper padding is written to
-	 * the end of the output stream.
-	 *
-	 * @exception IOException
-	 *                if an I/O error occurs
-	 */
 	public void close() throws IOException {
 		// Handle leftover bytes
 		if (charCount % 3 == 1) { // one leftover
@@ -122,33 +109,32 @@ public class Base64Encoder extends FilterOutputStream {
 		super.close();
 	}
 
-	/***
-	 * Returns the encoded form of the given unencoded string. The encoder uses the
-	 * ISO-8859-1 (Latin-1) encoding to convert the string to bytes. For greater
-	 * control over the encoding, encode the string to bytes yourself and use
-	 * encode(byte[]).
-	 *
+	/**
+	 * 将字符串进行Base64加密
+	 * 
 	 * @param unencoded
-	 *            the string to encode
-	 * @return the encoded form of the unencoded string
+	 *            原字符串
+	 * @return 加密的字符串
 	 */
 	public static String encode(String unencoded) {
 		byte[] bytes = null;
 		try {
 			bytes = unencoded.getBytes("UTF-8");
 		} catch (UnsupportedEncodingException ignored) {
+			logger.error("unsupport encoding exception", ignored);
+			throw new ChainUtilsRuntimeException("unsupport encoding exception", ignored);
 		}
-		return encode(bytes);
+		return encodeFromBytes(bytes);
 	}
 
-	/***
-	 * Returns the encoded form of the given unencoded string.
-	 *
+	/**
+	 * 将byte[]数组进行Base64加密
+	 * 
 	 * @param bytes
-	 *            the bytes to encode
-	 * @return the encoded form of the unencoded string
+	 *            要加密的byte[]数组
+	 * @return 加密后的字符串
 	 */
-	public static String encode(byte[] bytes) {
+	public static String encodeFromBytes(byte[] bytes) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream((int) (bytes.length * 1.37));
 		Base64Encoder encodedOut = new Base64Encoder(out);
 
@@ -158,7 +144,8 @@ public class Base64Encoder extends FilterOutputStream {
 
 			return out.toString("UTF-8");
 		} catch (IOException ignored) {
-			return null;
+			logger.error("io exception", ignored);
+			throw new ChainUtilsRuntimeException("io exception", ignored);
 		}
 	}
 }

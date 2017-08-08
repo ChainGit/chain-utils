@@ -1,5 +1,7 @@
 package com.chain.utils;
 
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * 
  * 常见的查找方法，包括<i>顺序查找，折半查找，最值查找</i>
@@ -44,7 +46,7 @@ public class IntegerArraySearchUtils {
 
 	private static void checkArray(int[] a) {
 		if (a == null || a.length < 1)
-			throw new RuntimeException("array is null or empty");
+			throw new ChainUtilsRuntimeException("array is null or empty");
 	}
 
 	/**

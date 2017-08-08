@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * IPv4地址工具类：部分方法依赖servlet-api.jar
  * 
@@ -53,7 +55,8 @@ public class Inet4AddressUtils {
 				try {
 					inet = InetAddress.getLocalHost();
 				} catch (UnknownHostException e) {
-					logger.error("网卡错误", e);
+					logger.error("unkown host exception", e);
+					throw new ChainUtilsRuntimeException("unkown host exception", e);
 				}
 				ip = inet.getHostAddress();
 			}
@@ -190,9 +193,9 @@ public class Inet4AddressUtils {
 			int i4 = ScaleConvertUtils.parseHexString(s4);
 			return i4 + DOT + i3 + DOT + i2 + DOT + i1;
 		} catch (Exception e) {
-			logger.error("IP地址转化错误!", e);
+			logger.error("ip convert error", e);
+			throw new ChainUtilsRuntimeException("ip convert error", e);
 		}
-		return null;
 	}
 
 	/**

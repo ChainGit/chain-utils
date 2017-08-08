@@ -3,6 +3,9 @@ package com.chain.utils.crypto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * DES加解密
  * 
@@ -12,6 +15,18 @@ import java.util.List;
  */
 @SuppressWarnings({ "rawtypes", "unused" })
 public class DESUtils {
+
+	private final Logger logger = LoggerFactory.getLogger(DESUtils.class);
+
+	private String firstKey;
+	private String secondKey;
+	private String thirdKey;
+
+	public DESUtils(String firstKey, String secondKey, String thirdKey) {
+		this.firstKey = firstKey;
+		this.secondKey = secondKey;
+		this.thirdKey = thirdKey;
+	}
 
 	/**
 	 * DES加密
@@ -26,7 +41,35 @@ public class DESUtils {
 	 *            第三个密钥
 	 * @return 加密字符串
 	 */
-	public String encode(String data, String firstKey, String secondKey, String thirdKey) {
+	public static String encrypt(String data, String firstKey, String secondKey, String thirdKey) {
+		return getInstance(firstKey, secondKey, thirdKey).encrypt(data);
+	}
+
+	/**
+	 * DES解密
+	 * 
+	 * @param data
+	 *            加密字符串
+	 * @param firstKey
+	 *            第一个密钥
+	 * @param secondKey
+	 *            第二个密钥
+	 * @param thirdKey
+	 *            第三个密钥
+	 * @return 解密字符串
+	 */
+	public static String decrypt(String data, String firstKey, String secondKey, String thirdKey) {
+		return getInstance(firstKey, secondKey, thirdKey).decrypt(data);
+	}
+
+	/**
+	 * DES加密
+	 * 
+	 * @param data
+	 *            原字符串
+	 * @return 加密字符串
+	 */
+	public String encrypt(String data) {
 		int leng = data.length();
 		String encData = "";
 		List firstKeyBt = null, secondKeyBt = null, thirdKeyBt = null;
@@ -192,15 +235,9 @@ public class DESUtils {
 	 * 
 	 * @param data
 	 *            加密字符串
-	 * @param firstKey
-	 *            第一个密钥
-	 * @param secondKey
-	 *            第二个密钥
-	 * @param thirdKey
-	 *            第三个密钥
 	 * @return 解密字符串
 	 */
-	public String decode(String data, String firstKey, String secondKey, String thirdKey) {
+	public String decrypt(String data) {
 		int leng = data.length();
 		String decStr = "";
 		List firstKeyBt = null, secondKeyBt = null, thirdKeyBt = null;
@@ -1044,8 +1081,8 @@ public class DESUtils {
 		return keys;
 	}
 
-	public static DESUtils getInstance() {
-		return new DESUtils();
+	public static DESUtils getInstance(String firstKey, String secondKey, String thirdKey) {
+		return new DESUtils(thirdKey, thirdKey, thirdKey);
 	}
 
 }

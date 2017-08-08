@@ -2,6 +2,9 @@ package com.chain.utils;
 
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 生成随机字符串的工具类<br>
  * 
@@ -13,6 +16,8 @@ import java.util.Random;
  *
  */
 public class RandomStringUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(RandomStringUtils.class);
 
 	public static final String ALL_CHAR = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	public static final String LETTER_CHAR = "abcdefghijkllmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

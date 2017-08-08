@@ -7,6 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.chain.exception.ChainUtilsRuntimeException;
+
 /**
  * Base64解密
  * 
@@ -16,6 +21,8 @@ import java.io.UnsupportedEncodingException;
  */
 public class Base64Decoder extends FilterInputStream {
 
+	private static final Logger logger = LoggerFactory.getLogger(Base64Decoder.class);
+
 	private static final char[] chars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
 			'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
 			'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
@@ -23,7 +30,7 @@ public class Base64Decoder extends FilterInputStream {
 
 	// A mapping between char values and six-bit integers
 	private static final int[] ints = new int[128];
-	
+
 	static {
 		for (int i = 0; i < 64; i++) {
 			ints[chars[i]] = i;
@@ -33,30 +40,31 @@ public class Base64Decoder extends FilterInputStream {
 	private int charCount;
 	private int carryOver;
 
-	/***
-	 * Constructs a new Base64 decoder that reads input from the given InputStream.
-	 *
-	 * @param in
-	 *            the input stream
-	 */
 	public Base64Decoder(InputStream in) {
 		super(in);
 	}
 
-	/***
-	 * Returns the next decoded character from the stream, or -1 if end of stream
-	 * was reached.
-	 *
-	 * @return the decoded character, or -1 if the end of the input stream is
-	 *         reached
-	 * @exception IOException
-	 *                if an I/O error occurs
+	/**
+	 * 获得实例
+	 * 
+	 * @param in
+	 *            输入流
+	 * @return 实例
 	 */
+	public Base64Decoder getInstance(InputStream in) {
+		return new Base64Decoder(in);
+	}
+
 	public int read() throws IOException {
 		// Read the next non-whitespace character
-		int x;
+		int x = -1;
 		do {
-			x = in.read();
+			try {
+				x = in.read();
+			} catch (IOException e) {
+				logger.error("io exception", e);
+				throw e;
+			}
 			if (x == -1) {
 				return -1;
 			}
@@ -101,31 +109,25 @@ public class Base64Decoder extends FilterInputStream {
 		return -1; // can't actually reach this line
 	}
 
-	/***
-	 * Reads decoded data into an array of bytes and returns the actual number of
-	 * bytes read, or -1 if end of stream was reached.
-	 *
-	 * @param buf
-	 *            the buffer into which the data is read
-	 * @param off
-	 *            the start offset of the data
-	 * @param len
-	 *            the maximum number of bytes to read
-	 * @return the actual number of bytes read, or -1 if the end of the input stream
-	 *         is reached
-	 * @exception IOException
-	 *                if an I/O error occurs
-	 */
 	public int read(byte[] buf, int off, int len) throws IOException {
 		if (buf.length < (len + off - 1)) {
-			throw new IOException("The input buffer is too small: " + len + " bytes requested starting at offset " + off
+			logger.error("The input buffer is too small: " + len + " bytes requested starting at offset " + off
 					+ " while the buffer " + " is only " + buf.length + " bytes long.");
+			throw new ChainUtilsRuntimeException(
+					"The input buffer is too small: " + len + " bytes requested starting at offset " + off
+							+ " while the buffer " + " is only " + buf.length + " bytes long.");
 		}
 
 		// This could of course be optimized
 		int i;
 		for (i = 0; i < len; i++) {
-			int x = read();
+			int x = -1;
+			try {
+				x = read();
+			} catch (IOException e) {
+				logger.error("io exception", e);
+				throw new IOException("io exception", e);
+			}
 			if (x == -1 && i == 0) { // an immediate -1 returns -1
 				return -1;
 			} else if (x == -1) { // a later -1 returns the chars read so far
@@ -137,30 +139,30 @@ public class Base64Decoder extends FilterInputStream {
 	}
 
 	/***
-	 * Returns the decoded form of the given encoded string, as a String. Note that
-	 * not all binary data can be represented as a String, so this method should
-	 * only be used for encoded String data. Use decodeToBytes() otherwise.
+	 * 将Base64编码的字符串解码
 	 *
 	 * @param encoded
-	 *            the string to decode
-	 * @return the decoded form of the encoded string
+	 *            编码的字符串
+	 * @return 解码后的字符串
 	 */
 	public static String decode(String encoded) {
 		return new String(decodeToBytes(encoded));
 	}
 
 	/***
-	 * Returns the decoded form of the given encoded string, as bytes.
+	 * 将Base64编码的字符串解码
 	 *
 	 * @param encoded
-	 *            the string to decode
-	 * @return the decoded form of the encoded string
+	 *            编码的字符串
+	 * @return 解码后的byte数组
 	 */
 	public static byte[] decodeToBytes(String encoded) {
 		byte[] bytes = null;
 		try {
 			bytes = encoded.getBytes("UTF-8");
 		} catch (UnsupportedEncodingException ignored) {
+			logger.error("unsupport encoding exception", ignored);
+			throw new ChainUtilsRuntimeException("unsupport encoding exception", ignored);
 		}
 
 		Base64Decoder in = new Base64Decoder(new ByteArrayInputStream(bytes));
@@ -173,12 +175,26 @@ public class Base64Decoder extends FilterInputStream {
 			while ((bytesRead = in.read(buf)) != -1) {
 				out.write(buf, 0, bytesRead);
 			}
-			in.close();
-			out.close();
-
 			return out.toByteArray();
 		} catch (IOException ignored) {
-			return null;
+			logger.error("io exception", ignored);
+			throw new ChainUtilsRuntimeException("io exception", ignored);
+		} finally {
+			if (in != null)
+				try {
+					in.close();
+				} catch (IOException e) {
+					logger.error("io exception", e);
+					throw new ChainUtilsRuntimeException("io exception", e);
+				}
+
+			if (out != null)
+				try {
+					out.close();
+				} catch (IOException e) {
+					logger.error("io exception", e);
+					throw new ChainUtilsRuntimeException("io exception", e);
+				}
 		}
 	}
 }
