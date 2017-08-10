@@ -12,9 +12,10 @@ import org.slf4j.Logger;
  */
 public class ChainUtilsLoggerFactory {
 
-	private static final String SLF4J_LOGGERFACTORY = "org.slf4j.LoggerFactory.class";
+	private static final String SLF4J_LOGGERFACTORY = "org.slf4j.LoggerFactory";
 
 	private static Class<?> slf4jClass = null;
+
 	static {
 		try {
 			slf4jClass = Class.forName(SLF4J_LOGGERFACTORY);
@@ -35,9 +36,8 @@ public class ChainUtilsLoggerFactory {
 		if (slf4jClass != null) {
 			try {
 				Method m = slf4jClass.getDeclaredMethod("getLogger", Class.class);
-				Object o = slf4jClass.newInstance();
 				m.setAccessible(true);
-				logger = (Logger) m.invoke(o, clz);
+				logger = (Logger) m.invoke(slf4jClass, clz);
 			} catch (Exception e) {
 
 			}
