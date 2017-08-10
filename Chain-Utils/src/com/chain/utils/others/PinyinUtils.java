@@ -1,9 +1,9 @@
 package com.chain.utils.others;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -22,7 +22,7 @@ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombi
  */
 public class PinyinUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(PinyinUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(PinyinUtils.class);
 
 	/**
 	 * 获得汉字的拼音

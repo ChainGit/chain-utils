@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 文件和文件夹工具类
@@ -20,7 +20,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class FileDirectoryUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(FileDirectoryUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(FileDirectoryUtils.class);
 
 	/**
 	 * 移动文件（注意读写权限）<br>

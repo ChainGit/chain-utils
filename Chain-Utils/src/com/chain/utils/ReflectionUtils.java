@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 反射工具类
@@ -26,7 +26,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class ReflectionUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(ReflectionUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(ReflectionUtils.class);
 
 	/**
 	 * 根据类名（className）获得对应的“类实例”（instance of Class）

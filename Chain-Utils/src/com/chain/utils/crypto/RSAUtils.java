@@ -24,9 +24,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 非对称加密算法RSA
@@ -38,7 +38,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class RSAUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(RSAUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(RSAUtils.class);
 
 	/** 指定加密算法为RSA */
 	private static final String ALGORITHM = "RSA";

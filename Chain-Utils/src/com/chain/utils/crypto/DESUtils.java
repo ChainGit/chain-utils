@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * DES加解密
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({ "rawtypes", "unused" })
 public class DESUtils {
 
-	private final Logger logger = LoggerFactory.getLogger(DESUtils.class);
+	private final Logger logger = ChainUtilsLoggerFactory.getLogger(DESUtils.class);
 
 	private String firstKey;
 	private String secondKey;

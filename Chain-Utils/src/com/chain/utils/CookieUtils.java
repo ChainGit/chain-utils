@@ -5,7 +5,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CookieUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(CookieUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(CookieUtils.class);
 
 	/**
 	 * 添加cookie

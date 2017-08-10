@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * Java对象和Map之间的互转
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ObjectMapConvertUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(ObjectMapConvertUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(ObjectMapConvertUtils.class);
 
 	/**
 	 * map转object

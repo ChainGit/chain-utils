@@ -1,10 +1,10 @@
 <b>工具包依赖：</b>
 
-必须：
+支持的log包：
 1、slf4j
 2、logback
 
-可选(部分功能)：
+部分功能需要：
 1、servlet-api
 2、bcprov
 3、jmimemagic
@@ -14,7 +14,11 @@
 
 <b>更新记录：</b>
 
-2017.08.08 - chain-utils-1.1.0:
+2017.08.10 - chain-utils-1.1.1：
+1、参照mybatis设计，使得slf4j是可选的
+2、分离doc成单独的jar包
+
+2017.08.08 - chain-utils-1.1.0：
 1、完善异常处理方式
 
 2017.08.07 - chain-utils-1.0.9：

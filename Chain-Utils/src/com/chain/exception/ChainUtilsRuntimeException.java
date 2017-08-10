@@ -1,11 +1,12 @@
 package com.chain.exception;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 public class ChainUtilsRuntimeException extends RuntimeException {
 
-	private static final Logger logger = LoggerFactory.getLogger(ChainUtilsRuntimeException.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(ChainUtilsRuntimeException.class);
 
 	/**
 	 * 

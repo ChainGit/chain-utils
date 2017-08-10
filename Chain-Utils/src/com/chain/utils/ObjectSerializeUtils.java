@@ -6,7 +6,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * Java序列化方式复制一个对象
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ObjectSerializeUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(ObjectSerializeUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(ObjectSerializeUtils.class);
 
 	/**
 	 * 通过序列化复制一个对象(完全拷贝，速度较慢)

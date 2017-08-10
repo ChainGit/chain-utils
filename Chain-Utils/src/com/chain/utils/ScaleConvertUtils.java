@@ -3,9 +3,9 @@ package com.chain.utils;
 import java.math.BigInteger;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 进制转换工具类<br>
@@ -35,7 +35,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class ScaleConvertUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(ScaleConvertUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(ScaleConvertUtils.class);
 
 	private static Class<ScaleConvertUtils> clz = ScaleConvertUtils.class;
 

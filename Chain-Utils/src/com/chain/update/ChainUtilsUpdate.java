@@ -82,6 +82,10 @@ public class ChainUtilsUpdate {
 		latestVersionDir.mkdirs();
 		File newestJar = new File(workPath + File.separator + "out" + File.separator + fullName);
 		ChainUtilsUpdateUtils.getInstance().copyFile(newestJar, new File(newVersionDir + File.separator + fullName));
+		File javadocJar = new File(
+				workPath + File.separator + "out" + File.separator + baseName + "javadoc" + tailName);
+		ChainUtilsUpdateUtils.getInstance().copyFile(javadocJar,
+				new File(latestVersionPath + File.separator + baseName + "javadoc" + tailName));
 		String latestJar = baseName + "latest" + tailName;
 		ChainUtilsUpdateUtils.getInstance().copyFile(newestJar,
 				new File(latestVersionPath + File.separator + latestJar));

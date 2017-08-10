@@ -19,9 +19,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 import net.sf.jmimemagic.Magic;
 import net.sf.jmimemagic.MagicMatch;
@@ -37,7 +37,7 @@ import net.sf.jmimemagic.MagicMatch;
  */
 public class FileUpDownloadUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(FileUpDownloadUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(FileUpDownloadUtils.class);
 
 	/**
 	 * POST方式发送表单<br>

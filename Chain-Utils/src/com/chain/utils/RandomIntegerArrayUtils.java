@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Random;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 
@@ -20,7 +20,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class RandomIntegerArrayUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(RandomIntegerArrayUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(RandomIntegerArrayUtils.class);
 
 	/**
 	 * 随机指定范围内N个不重复的数 利用List中contains方法

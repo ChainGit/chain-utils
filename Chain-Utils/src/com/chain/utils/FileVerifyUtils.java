@@ -10,7 +10,8 @@ import java.util.zip.CRC32;
 import java.util.zip.CheckedInputStream;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 文件校验 MD5,SHA1,CRC32
@@ -21,7 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FileVerifyUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(FileVerifyUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(FileVerifyUtils.class);
 
 	public static final String MD5 = "MD5";
 	public static final String SHA1 = "SHA1";

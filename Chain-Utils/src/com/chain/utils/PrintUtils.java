@@ -1,7 +1,8 @@
 package com.chain.utils;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 打印到控制台
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PrintUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(PrintUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(PrintUtils.class);
 
 	public static void show(Object obj) {
 		System.out.println(obj);

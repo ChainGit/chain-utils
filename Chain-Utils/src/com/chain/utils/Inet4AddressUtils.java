@@ -6,9 +6,9 @@ import java.net.UnknownHostException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * IPv4地址工具类：部分方法依赖servlet-api.jar
@@ -20,7 +20,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
 
 public class Inet4AddressUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(Inet4AddressUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(Inet4AddressUtils.class);
 
 	private static final int DEFAULT = -1;
 

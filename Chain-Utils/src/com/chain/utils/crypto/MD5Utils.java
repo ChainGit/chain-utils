@@ -4,9 +4,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * MD5加密，生成MD5字符串(32位)
@@ -17,7 +17,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class MD5Utils {
 
-	private static final Logger logger = LoggerFactory.getLogger(MD5Utils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(MD5Utils.class);
 
 	private final static String[] strDigits = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
 			"e", "f" };

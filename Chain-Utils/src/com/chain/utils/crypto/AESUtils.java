@@ -83,9 +83,9 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * AES加解密
@@ -98,7 +98,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class AESUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(AESUtils.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(AESUtils.class);
 
 	private static final String KEY_GENERATION_ALG = "PBKDF2WithHmacSHA1"; // PBEWITHSHAANDTWOFISH-CBC
 	private static final String CIPHERMODEPADDING = "AES/CBC/PKCS7Padding";

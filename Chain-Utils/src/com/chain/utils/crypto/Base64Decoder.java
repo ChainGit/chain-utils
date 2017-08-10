@@ -8,9 +8,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * Base64解密
@@ -21,7 +21,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class Base64Decoder extends FilterInputStream {
 
-	private static final Logger logger = LoggerFactory.getLogger(Base64Decoder.class);
+	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(Base64Decoder.class);
 
 	private static final char[] chars = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
 			'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
