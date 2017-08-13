@@ -16,9 +16,15 @@ public class ChainUtilsLoggerFactory {
 
 	private static Class<?> slf4jClass = null;
 
+	private static Method slf4jGetLogger = null;
+
 	static {
 		try {
 			slf4jClass = Class.forName(SLF4J_LOGGERFACTORY);
+			if (slf4jClass != null) {
+				slf4jGetLogger = slf4jClass.getDeclaredMethod("getLogger", Class.class);
+				slf4jGetLogger.setAccessible(true);
+			}
 		} catch (Exception e) {
 
 		}
@@ -35,9 +41,7 @@ public class ChainUtilsLoggerFactory {
 		Logger logger = null;
 		if (slf4jClass != null) {
 			try {
-				Method m = slf4jClass.getDeclaredMethod("getLogger", Class.class);
-				m.setAccessible(true);
-				logger = (Logger) m.invoke(slf4jClass, clz);
+				logger = (Logger) slf4jGetLogger.invoke(slf4jClass, clz);
 			} catch (Exception e) {
 
 			}
