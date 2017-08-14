@@ -156,9 +156,10 @@ public class RSAUtils {
 	 * 
 	 * @param in
 	 *            公钥输入流
+	 * @return Key对象
 	 */
-	public void loadPublicKey(InputStream in) {
-		publicKey = generatePublicKey(readKey(in));
+	public static Key loadPublicKey(InputStream in) {
+		return generatePublicKey(readKey(in));
 
 	}
 
@@ -167,9 +168,10 @@ public class RSAUtils {
 	 * 
 	 * @param in
 	 *            输入流
+	 * @return Key对象
 	 */
-	public void loadPrivateKey(InputStream in) {
-		privateKey = generatePrivateKey(readKey(in));
+	public static Key loadPrivateKey(InputStream in) {
+		return generatePrivateKey(readKey(in));
 	}
 
 	/**
@@ -179,7 +181,7 @@ public class RSAUtils {
 	 *            输入流
 	 * @return 密钥字符串
 	 */
-	private String readKey(InputStream in) {
+	private static String readKey(InputStream in) {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String readLine = null;
 		StringBuilder sb = new StringBuilder();
