@@ -1,5 +1,8 @@
 package com.chain.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 字符串工具类
  * 
@@ -8,6 +11,8 @@ package com.chain.utils;
  *
  */
 public class StringUtils {
+
+	private static Logger logger = LoggerFactory.getLogger(StringUtils.class);
 
 	/**
 	 * 判断字符串是否为空
