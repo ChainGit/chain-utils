@@ -235,6 +235,8 @@ public class CryptoFactoryBean {
 	 */
 	public AESUtils getAesUtils(boolean isSingleTon) {
 		String key = keyStore.get(AES_KEY);
+		if (aesUtils == null)
+			checkStr(key);
 		if (!isSingleTon)
 			return new AESUtils(key);
 		else {
@@ -277,6 +279,10 @@ public class CryptoFactoryBean {
 	public RSAUtils getRsaUtils(boolean isSingleTon) {
 		String publicKey = keyStore.get(RSA_PUBLIC_KEY);
 		String privateKey = keyStore.get(RSA_PRIVATE_KEY);
+		if (rsaUtils == null) {
+			checkStr(publicKey);
+			checkStr(privateKey);
+		}
 		if (!isSingleTon)
 			return new RSAUtils(publicKey, privateKey);
 		else {
