@@ -7,6 +7,7 @@ import org.junit.Test;
 import com.chain.utils.crypto.AESUtils;
 import com.chain.utils.crypto.Base64Decoder;
 import com.chain.utils.crypto.Base64Encoder;
+import com.chain.utils.crypto.CryptoFactoryBean;
 import com.chain.utils.crypto.DESUtils;
 import com.chain.utils.crypto.MD5Utils;
 import com.chain.utils.crypto.RSAUtils;
@@ -107,6 +108,43 @@ public class CryptoUtilsTest {
 		 * String enstr4 = rsa.encryptByPublicKey(text); System.out.println(enstr4);
 		 * String destr4 = rsa.decryptByPublicKey(enstr4); System.out.println(destr4);
 		 */
+	}
+
+	// 测试CryptoFactoryBean
+	@Test
+	public void test6() {
+		String tmp = "E:/Temps/";
+		CryptoFactoryBean factoryBean = new CryptoFactoryBean();
+		factoryBean.setRsaPublicKeyFilePath(tmp + "public.key");
+		factoryBean.setRsaPrivateKeyFilePath(tmp + "private.key");
+		factoryBean.setDesFirstKeyFilePath(tmp + "des1.key");
+		factoryBean.setDesSecondKeyFilePath(tmp + "des2.key");
+		factoryBean.setDesThirdKeyFilePath(tmp + "des3.key");
+		factoryBean.setAesKeyFilePath(tmp + "aes.key");
+
+		RSAUtils rsa = factoryBean.getRsaUtils(true);
+		AESUtils aes = factoryBean.getAesUtils(true);
+		DESUtils des = factoryBean.getDesUtils(true);
+
+		String enstr1 = rsa.encryptByPublicKey(text);
+		System.out.println(enstr1);
+		String destr1 = rsa.decryptByPrivateKey(enstr1);
+		System.out.println(destr1);
+
+		String enstr2 = rsa.encryptByPrivateKey(text);
+		System.out.println(enstr2);
+		String destr2 = rsa.decryptByPublicKey(enstr2);
+		System.out.println(destr2);
+
+		String enstr3 = des.encrypt(text);
+		System.out.println(enstr3);
+		String destr3 = des.decrypt(enstr3);
+		System.out.println(destr3);
+
+		String enstr4 = aes.encrypt(text);
+		System.out.println(enstr4);
+		String destr4 = aes.decrypt(enstr4);
+		System.out.println(destr4);
 	}
 
 }

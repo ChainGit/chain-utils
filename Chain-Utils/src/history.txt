@@ -16,6 +16,7 @@
 
 2017.08.15 - chain-utils-1.1.2：
 1、优化RSAUtils的使用
+2、加入CryptoFactoryBean
 
 2017.08.10 - chain-utils-1.1.1：
 1、参照mybatis设计，使得slf4j是可选的
