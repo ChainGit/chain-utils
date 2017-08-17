@@ -126,14 +126,38 @@ public class CryptoUtilsTest {
 		AESUtils aes = factoryBean.getAesUtils(true);
 		DESUtils des = factoryBean.getDesUtils(true);
 
-		String enstr1 = rsa.encryptByPublicKey(text);
+		String enstr1 = rsa.encryptByPublicKey("{\"t\":\"123\"}");
 		System.out.println(enstr1);
 		String destr1 = rsa.decryptByPrivateKey(enstr1);
 		System.out.println(destr1);
 
 		String enstr2 = rsa.encryptByPrivateKey(text);
 		System.out.println(enstr2);
-		String destr2 = rsa.decryptByPublicKey(enstr2);
+		String destr2 = rsa
+				.decryptByPublicKey("qThHD55Wt2TZRPbuRHcgoV4MhfhOL3NZHCVtRYh+otyo1b8BsTCujwezn4GzVc9qAKl6iYdhf5MH\r\n"
+						+ "aVcfjPGBjXwOp3qvD+f/c8E0z18x58OnJh042bExhQMdm9t3QVaFzOp9i/galg81ICrP49YObqc2\r\n"
+						+ "5Rc5uYapM3YcuMLCkk0YxveVs1iAVwEl6jXDm/T/R61d9I2PE6nvcumzUIJD9CW8TN0eoof9en9b\r\n"
+						+ "+AzqaVdPL8JOlIxrqPuDpNlyfD+G2w9LNYSbThHhPaYq2OkYLxSc91xHy36NlB6RoBIJS2XaXINf\r\n"
+						+ "pMOXJ1JyvcytuFQqCM6UudxPZ52rfibPS4IcLLQ+JOYGbtbsbheZry8iLTm7Z3V1uXq/jBCEJK6G\r\n"
+						+ "u3d5MdczKRvjwkVeTViqbahElRGx4fuwqErX+sGGic1CGp+BjJarzIFWECebkaqmWBo98uI8zwAW\r\n"
+						+ "V+dEl9D5tv14sCU0cBBeZGXS/Fn4/NXHrY0xDauqmKduoz50jTVmHo0o");
+		System.out.println(destr2);
+		destr2 = rsa
+				.decryptByPublicKey("Rv+jbt5buRPMoHn8a3ocRhEYPrICPDdi2IDSUMNnhw29AuaJeXxBkAQ6t74WQSKxHxPXIbS1P+hS\r\n" + 
+						"CMvGl76G2Z80qKiGyhE9zkQYwnfOSmGbzdqEsbPH6VSe6kB1m7hbEhfydSfbA4hgUK1HdXRnp51Y\r\n" + 
+						"wemRNlSNPRTNIZS+IVY=");
+		System.out.println(destr2);
+		destr2 = rsa
+				.decryptByPublicKey("McN2/Syl0vLUQfkLBKeOQvLCiI//0I9lrtkLrFz7LJNT6eS8r5PZ36xAF9h1o9fSDu2B1daK3hcm\r\n" + 
+						"DpcOa7Bnx1VVRDu3lW/tSLkGsJz1AFZbPukwimYfn5rM//Ppm6E3ZwL8fbE6UB/bRFSi2+UIl7UL\r\n" + 
+						"37FQW2F12/JJsPOoFCt1SKA6tX7UdMJumfqE3E1g4X3O3QGNQDFoOXZ5L5bu6gDEa8tWlVzhBS6E\r\n" + 
+						"fHCzw1Ycej/KfwZ54R8Dr8I8AWiyBkroCnbYKf0t02UCzMg/cLbBY01SR7POu+Xdrpxus8NfP1R5\r\n" + 
+						"t8O9i/coc2SoigQmf+VGV0dJdr/VdKvYYw6B9Q==");
+		System.out.println(destr2);
+		destr2 = rsa
+				.decryptByPublicKey("f8TlrghyiC8SfaxnVWZNjcUH8RPoIU4tc4jDGeFswt+8A7q1mvdxTupGZ6iE7PvAzvvrkPPwSpsI\r\n" + 
+						"xu4zqW/dXcFeWpPvE0F2RCf0h3bJbGch95O4kGAOQU3RuygPeArTsjsUly7zsKOJ3VHMCxx+SAi6\r\n" + 
+						"zUPxlaUiRG4cyvkKAic=");
 		System.out.println(destr2);
 
 		String enstr3 = des.encrypt(text);
