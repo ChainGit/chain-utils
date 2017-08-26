@@ -93,7 +93,7 @@ import com.chain.logging.ChainUtilsLoggerFactory;
  * 依赖架包下载： https://www.bouncycastle.org/latest_releases.html
  * 
  * @author Collected
- * @version 1.0
+ * @version 1.1
  * 
  */
 public class AESUtils {
@@ -111,7 +111,7 @@ public class AESUtils {
 	private static final byte[] SALT = { 106, 105, 106, 105, 97, 0x1, 0x5, 0x9, 0x9, 0x6, 0x3, 0x7, 0x3, 0x3, 0x9,
 			0x0 }; // must
 
-	private static final byte[] IV = { 108, 105, 97, 110, 103, 0x1, 0x5, 0x9, 0x9, 0x6, 0x3, 0x7, 0x3, 0x3, 0x9, 0x0 };
+	private static final String IV_DEFAULT_STR = "0123456789123123";// 16位，如果不设置iv则使用默认的
 
 	private static SecretKeyFactory keyfactory = null;
 
@@ -133,7 +133,11 @@ public class AESUtils {
 	}
 
 	public AESUtils(String passphrase) {
-		init(passphrase);
+		init(passphrase, IV_DEFAULT_STR);
+	}
+
+	public AESUtils(String passphrase, String ivStr) {
+		init(passphrase, ivStr);
 	}
 
 	/**
@@ -142,7 +146,7 @@ public class AESUtils {
 	 * @param passphrase
 	 *            密码
 	 */
-	private void init(String passphrase) {
+	private void init(String passphrase, String ivStr) {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		if (passphrase == null || passphrase.length() < 1) {
@@ -154,7 +158,7 @@ public class AESUtils {
 			sk = keyfactory.generateSecret(myKeyspec);
 			byte[] skAsByteArray = sk.getEncoded();
 			skforAES = new SecretKeySpec(skAsByteArray, "AES");
-			iv = new IvParameterSpec(IV);
+			iv = new IvParameterSpec(ivStr.getBytes());
 		} catch (InvalidKeySpecException ikse) {
 			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
 			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
@@ -274,6 +278,21 @@ public class AESUtils {
 	 * @return 加密并Base64的字符串
 	 */
 	public static String encrypt(String plaintext, String passphrase) {
+		return encrypt(plaintext, passphrase, IV_DEFAULT_STR);
+	}
+
+	/**
+	 * 静态方法，加密字符串
+	 * 
+	 * @param plaintext
+	 *            原字符串
+	 * @param passphrase
+	 *            密钥
+	 * @param ivStr
+	 *            iv偏移量（16位）
+	 * @return 加密并Base64的字符串
+	 */
+	public static String encrypt(String plaintext, String passphrase, String ivStr) {
 		if (passphrase == null || passphrase.length() < 1) {
 			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
 		}
@@ -292,7 +311,7 @@ public class AESUtils {
 			sk = keyfactory.generateSecret(myKeyspec);
 			byte[] skAsByteArray = sk.getEncoded();
 			skforAES = new SecretKeySpec(skAsByteArray, "AES");
-			iv = new IvParameterSpec(IV);
+			iv = new IvParameterSpec(ivStr.getBytes());
 		} catch (InvalidKeySpecException ikse) {
 			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
 			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
@@ -313,6 +332,21 @@ public class AESUtils {
 	 * @return 解密的字符串
 	 */
 	public static String decrypt(String ciphertext_base64, String passphrase) {
+		return decrypt(ciphertext_base64, passphrase, IV_DEFAULT_STR);
+	}
+
+	/**
+	 * 静态方法，解密字符串
+	 * 
+	 * @param ciphertext_base64
+	 *            Base64加密的字符串
+	 * @param passphrase
+	 *            密钥
+	 * @param ivStr
+	 *            iv偏移量（16位）
+	 * @return 解密的字符串
+	 */
+	public static String decrypt(String ciphertext_base64, String passphrase, String ivStr) {
 		if (passphrase == null || passphrase.length() < 1) {
 			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
 		}
@@ -331,7 +365,7 @@ public class AESUtils {
 			sk = keyfactory.generateSecret(myKeyspec);
 			byte[] skAsByteArray = sk.getEncoded();
 			skforAES = new SecretKeySpec(skAsByteArray, "AES");
-			iv = new IvParameterSpec(IV);
+			iv = new IvParameterSpec(ivStr.getBytes());
 		} catch (InvalidKeySpecException ikse) {
 			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
 			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException

@@ -1,5 +1,6 @@
 package com.chain.test;
 
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
 
 import org.junit.Test;
@@ -112,7 +113,7 @@ public class CryptoUtilsTest {
 
 	// 测试CryptoFactoryBean
 	@Test
-	public void test6() {
+	public void test6() throws UnsupportedEncodingException {
 		String tmp = "E:/Temps/";
 		CryptoFactoryBean factoryBean = new CryptoFactoryBean();
 		factoryBean.setRsaPublicKeyFilePath(tmp + "public.key");
@@ -121,6 +122,7 @@ public class CryptoUtilsTest {
 		factoryBean.setDesSecondKeyFilePath(tmp + "des2.key");
 		factoryBean.setDesThirdKeyFilePath(tmp + "des3.key");
 		factoryBean.setAesKeyFilePath(tmp + "aes.key");
+		factoryBean.setAesIvFilePath(tmp + "aes-iv.key");
 
 		RSAUtils rsa = factoryBean.getRsaUtils(true);
 		AESUtils aes = factoryBean.getAesUtils(true);

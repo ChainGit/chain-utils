@@ -216,6 +216,23 @@ public class CryptoFactoryBean {
 		setAesKeyString(key);
 	}
 
+	public void setAesIvString(String key) {
+		checkStr(key);
+		if (key.length() < 16)
+			throw new ChainUtilsRuntimeException("AES iv length should be at least 16");
+		keyStore.put(AES_IV, key);
+	}
+
+	public void setAesIvBase64EncodedString(String ekey) {
+		String key = Base64Decoder.decode(ekey);
+		setAesIvString(key);
+	}
+
+	public void setAesIvFilePath(String keyFile) {
+		String key = readFromFile(keyFile);
+		setAesIvString(key);
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	private AESUtils aesUtils;
@@ -228,6 +245,7 @@ public class CryptoFactoryBean {
 	private static final String DES_SECOND_KEY = "DesSecondtKey";
 	private static final String DES_THIRD_KEY = "DesThirdtKey";
 	private static final String AES_KEY = "AesKey";
+	private static final String AES_IV = "AesIv";
 
 	/**
 	 * 获取AES工具类
@@ -238,13 +256,16 @@ public class CryptoFactoryBean {
 	 */
 	public AESUtils getAesUtils(boolean isSingleTon) {
 		String key = keyStore.get(AES_KEY);
-		if (aesUtils == null)
+		String iv = keyStore.get(AES_IV);
+		if (aesUtils == null) {
 			checkStr(key);
+			checkStr(iv);
+		}
 		if (!isSingleTon)
-			return new AESUtils(key);
+			return new AESUtils(key, iv);
 		else {
 			if (aesUtils == null)
-				aesUtils = new AESUtils(key);
+				aesUtils = new AESUtils(key, iv);
 			return aesUtils;
 		}
 	}
