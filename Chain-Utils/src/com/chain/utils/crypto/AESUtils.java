@@ -115,11 +115,9 @@ public class AESUtils {
 
 	private static SecretKeyFactory keyfactory = null;
 
-	private SecretKey sk = null;
 	private SecretKeySpec skforAES = null;
 
 	private IvParameterSpec iv;
-	private PBEKeySpec myKeyspec = null;
 
 	static {
 		if (keyfactory == null)
@@ -133,11 +131,15 @@ public class AESUtils {
 	}
 
 	public AESUtils(String passphrase) {
-		init(passphrase, IV_DEFAULT_STR);
+		init(passphrase, IV_DEFAULT_STR, false);
 	}
 
 	public AESUtils(String passphrase, String ivStr) {
-		init(passphrase, ivStr);
+		init(passphrase, ivStr, false);
+	}
+
+	public AESUtils(String passphrase, String ivStr, boolean salt) {
+		init(passphrase, ivStr, salt);
 	}
 
 	/**
@@ -145,8 +147,10 @@ public class AESUtils {
 	 * 
 	 * @param passphrase
 	 *            密码
+	 * @param salt
+	 *            是否密钥加盐
 	 */
-	private void init(String passphrase, String ivStr) {
+	private void init(String passphrase, String ivStr, boolean salt) {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		if (passphrase == null || passphrase.length() < 1) {
@@ -154,16 +158,40 @@ public class AESUtils {
 		}
 
 		try {
-			myKeyspec = new PBEKeySpec(passphrase.toCharArray(), SALT, HASH_ITERATIONS, KEY_LENGTH);
-			sk = keyfactory.generateSecret(myKeyspec);
-			byte[] skAsByteArray = sk.getEncoded();
-			skforAES = new SecretKeySpec(skAsByteArray, "AES");
+			passphrase = salt(passphrase, salt);
+			skforAES = new SecretKeySpec(passphrase.getBytes(), "AES");
 			iv = new IvParameterSpec(ivStr.getBytes());
-		} catch (InvalidKeySpecException ikse) {
+		} catch (Exception ikse) {
 			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
 			// 按照标准使用API一般能正确生成实例，所以这里转为RuntimeException
 			throw new ChainUtilsRuntimeException("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
 		}
+	}
+
+	/**
+	 * 对密码加盐，如果不使用加盐，请确保密钥长度为16
+	 * 
+	 * @param passphrase
+	 *            原密码
+	 * @param salt
+	 *            是否加密
+	 * @return 加盐结果
+	 * @throws InvalidKeySpecException
+	 *             密码转换异常
+	 */
+	public static String salt(String passphrase, boolean salt) throws InvalidKeySpecException {
+		if (!salt)
+			return passphrase.substring(0, 16);
+		PBEKeySpec myKeyspec = new PBEKeySpec(passphrase.toCharArray(), SALT, HASH_ITERATIONS, KEY_LENGTH);
+		SecretKey sk = keyfactory.generateSecret(myKeyspec);
+		byte[] skAsByteArray = sk.getEncoded();
+		try {
+			return new String(skAsByteArray, ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			// UTF-8肯定支持
+			logger.error("unsupported encoding exception", e);
+		}
+		return passphrase;
 	}
 
 	/**
@@ -293,13 +321,28 @@ public class AESUtils {
 	 * @return 加密并Base64的字符串
 	 */
 	public static String encrypt(String plaintext, String passphrase, String ivStr) {
+		return encrypt(plaintext, passphrase, ivStr, false);
+	}
+
+	/**
+	 * 静态方法，加密字符串
+	 * 
+	 * @param plaintext
+	 *            原字符串
+	 * @param passphrase
+	 *            密钥
+	 * @param ivStr
+	 *            iv偏移量（16位）
+	 * @param salt
+	 *            密钥是否加盐
+	 * @return 加密并Base64的字符串
+	 */
+	public static String encrypt(String plaintext, String passphrase, String ivStr, boolean salt) {
 		if (passphrase == null || passphrase.length() < 1) {
 			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
 		}
-		SecretKey sk = null;
 		SecretKeySpec skforAES = null;
 		IvParameterSpec iv = null;
-		PBEKeySpec myKeyspec = null;
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		if (passphrase == null || passphrase.length() < 1) {
@@ -307,10 +350,8 @@ public class AESUtils {
 		}
 
 		try {
-			myKeyspec = new PBEKeySpec(passphrase.toCharArray(), SALT, HASH_ITERATIONS, KEY_LENGTH);
-			sk = keyfactory.generateSecret(myKeyspec);
-			byte[] skAsByteArray = sk.getEncoded();
-			skforAES = new SecretKeySpec(skAsByteArray, "AES");
+			passphrase = salt(passphrase, salt);
+			skforAES = new SecretKeySpec(passphrase.getBytes(), "AES");
 			iv = new IvParameterSpec(ivStr.getBytes());
 		} catch (InvalidKeySpecException ikse) {
 			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
@@ -347,13 +388,28 @@ public class AESUtils {
 	 * @return 解密的字符串
 	 */
 	public static String decrypt(String ciphertext_base64, String passphrase, String ivStr) {
+		return decrypt(ciphertext_base64, passphrase, ivStr, false);
+	}
+
+	/**
+	 * 静态方法，解密字符串
+	 * 
+	 * @param ciphertext_base64
+	 *            Base64加密的字符串
+	 * @param passphrase
+	 *            密钥
+	 * @param ivStr
+	 *            iv偏移量（16位）
+	 * @param salt
+	 *            密钥是否加盐
+	 * @return 解密的字符串
+	 */
+	public static String decrypt(String ciphertext_base64, String passphrase, String ivStr, boolean salt) {
 		if (passphrase == null || passphrase.length() < 1) {
 			throw new ChainUtilsRuntimeException("passphrase can't be null or empty.");
 		}
-		SecretKey sk = null;
 		SecretKeySpec skforAES = null;
 		IvParameterSpec iv = null;
-		PBEKeySpec myKeyspec = null;
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
 		if (passphrase == null || passphrase.length() < 1) {
@@ -361,10 +417,8 @@ public class AESUtils {
 		}
 
 		try {
-			myKeyspec = new PBEKeySpec(passphrase.toCharArray(), SALT, HASH_ITERATIONS, KEY_LENGTH);
-			sk = keyfactory.generateSecret(myKeyspec);
-			byte[] skAsByteArray = sk.getEncoded();
-			skforAES = new SecretKeySpec(skAsByteArray, "AES");
+			passphrase = salt(passphrase, salt);
+			skforAES = new SecretKeySpec(passphrase.getBytes(), "AES");
 			iv = new IvParameterSpec(ivStr.getBytes());
 		} catch (InvalidKeySpecException ikse) {
 			logger.error("invalid key spec for PBEWITHSHAANDTWOFISH-CBC", ikse);
