@@ -9,14 +9,24 @@
 2、bcprov
 3、jmimemagic
 4、pinyin4j
+5、jackson
 
 <hr/>
 
 <b>更新记录：</b>
 
+2017.08.26 - chain-utils-1.1.3:
+1、添加使用bcprov的RSA2Utils
+2、加入jsencrypt的rsa相关js文件
+3、加入URLUtils
+4、加入NumberUtils
+5、加入Java8的DateTimeUtils时间工具类
+6、加入EmptyUtils工具类
+7、完善CryptoFactoryBean
+
 2017.08.15 - chain-utils-1.1.2：
 1、优化RSAUtils的使用
-2、加入CryptoFactoryBean
+2、加入CryptoFactoryBean，方便Spring的使用
 
 2017.08.10 - chain-utils-1.1.1：
 1、参照mybatis设计，使得slf4j是可选的

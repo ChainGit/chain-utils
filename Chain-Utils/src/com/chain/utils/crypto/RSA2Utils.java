@@ -23,6 +23,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 
 import com.chain.exception.ChainUtilsRuntimeException;
@@ -31,15 +32,14 @@ import com.chain.logging.ChainUtilsLoggerFactory;
 /**
  * 非对称加密算法RSA
  * 
- * 使用JavaAPI的加密算法 <br>
- * js部分使用：JSEncrypt
+ * java部分使用：bcprov-jdk15on-157<br>
+ * js部分使用：http://www.ohdave.com/rsa/
  * 
  * @author Collected
- * @version 1.1
- * 
+ * @version 1.0
  * 
  */
-public class RSAUtils {
+public class RSA2Utils {
 
 	private static final Logger logger = ChainUtilsLoggerFactory.getLogger(RSAUtils.class);
 
@@ -65,14 +65,14 @@ public class RSAUtils {
 	 */
 	private static final int MAX_DECRYPT_BLOCK = 128;
 
-	public RSAUtils(Key publicKey, Key privateKey) {
+	public RSA2Utils(Key publicKey, Key privateKey) {
 		this.publicKey = publicKey;
 		this.privateKey = privateKey;
 		this.publicKeyString = toKeyString(publicKey);
 		this.privateKeyString = toKeyString(privateKey);
 	}
 
-	public RSAUtils(String publicKeyString, String privateKeyString) {
+	public RSA2Utils(String publicKeyString, String privateKeyString) {
 		this.publicKeyString = publicKeyString;
 		this.privateKeyString = privateKeyString;
 		this.publicKey = generatePublicKey(publicKeyString);
@@ -98,7 +98,7 @@ public class RSAUtils {
 		/** 为RSA算法创建一个KeyPairGenerator对象 */
 		KeyPairGenerator keyPairGenerator = null;
 		try {
-			keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM);
+			keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, new BouncyCastleProvider());
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("no such algorithm exception", e);
 			throw new ChainUtilsRuntimeException("no such algorithm exception", e);
@@ -112,6 +112,24 @@ public class RSAUtils {
 		/** 得到私钥 */
 		Key privateKey = keyPair.getPrivate();
 		return new Key[] { publicKey, privateKey };
+	}
+
+	/**
+	 * 获得十六进制的ModulusString
+	 * 
+	 * @return PublicModulusString
+	 */
+	public String getPublicModulusString() {
+		return ((RSAPublicKey) publicKey).getModulus().toString(16);
+	}
+
+	/**
+	 * 获得十六进制的ExponentString
+	 * 
+	 * @return PublicExponentString
+	 */
+	public String getPublicExponentString() {
+		return ((RSAPublicKey) publicKey).getPublicExponent().toString(16);
 	}
 
 	/**
@@ -216,7 +234,7 @@ public class RSAUtils {
 		/** 得到Cipher对象对已用公钥加密的数据进行RSA解密 */
 		Cipher cipher;
 		try {
-			cipher = Cipher.getInstance(ALGORITHM);
+			cipher = Cipher.getInstance(ALGORITHM, new BouncyCastleProvider());
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("no such exception", e);
 			throw new ChainUtilsRuntimeException("no such exception", e);
@@ -228,7 +246,7 @@ public class RSAUtils {
 			logger.error("invalid key exception", e);
 			throw new ChainUtilsRuntimeException("invalid key exception", e);
 		}
-		byte[] encryptedData = Base64Decoder.decodeToBytes(cryptoSrc);
+		byte[] encryptedData = strToBase64(cryptoSrc);
 
 		/** 执行解密操作 */
 		int inputLen = encryptedData.length;
@@ -279,7 +297,9 @@ public class RSAUtils {
 		// Cipher cipher = Cipher.getInstance(ALGORITHM);
 		Cipher cipher;
 		try {
-			cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+			// cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", new
+			// BouncyCastleProvider());
+			cipher = Cipher.getInstance(ALGORITHM, new BouncyCastleProvider());
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("no such exception", e);
 			throw new ChainUtilsRuntimeException("no such exception", e);
@@ -290,7 +310,7 @@ public class RSAUtils {
 			logger.error("invalid key exception", e);
 			throw new ChainUtilsRuntimeException("invalid key exception", e);
 		}
-		byte[] encryptedData = Base64Decoder.decodeToBytes(cryptoSrc);
+		byte[] encryptedData = strToBase64(cryptoSrc);
 		/** 执行解密操作 */
 
 		int inputLen = encryptedData.length;
@@ -341,7 +361,7 @@ public class RSAUtils {
 		/** 得到Cipher对象来实现对源数据的RSA加密 */
 		Cipher cipher = null;
 		try {
-			cipher = Cipher.getInstance(ALGORITHM);
+			cipher = Cipher.getInstance(ALGORITHM, new BouncyCastleProvider());
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("no such exception", e);
 			throw new ChainUtilsRuntimeException("no such exception", e);
@@ -387,7 +407,7 @@ public class RSAUtils {
 			logger.error("io exception", e);
 			throw new ChainUtilsRuntimeException("io exception", e);
 		}
-		return Base64Encoder.encodeFromBytes(encryptedData);
+		return base64ToStr(encryptedData);
 	}
 
 	/**
@@ -401,7 +421,7 @@ public class RSAUtils {
 		/** 得到Cipher对象来实现对源数据的RSA加密 */
 		Cipher cipher;
 		try {
-			cipher = Cipher.getInstance(ALGORITHM);
+			cipher = Cipher.getInstance(ALGORITHM, new BouncyCastleProvider());
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			logger.error("no such exception", e);
 			throw new ChainUtilsRuntimeException("no such exception", e);
@@ -448,7 +468,7 @@ public class RSAUtils {
 			throw new ChainUtilsRuntimeException("io exception", e);
 		}
 
-		return Base64Encoder.encodeFromBytes(encryptedData);
+		return base64ToStr(encryptedData);
 	}
 
 	/**
@@ -461,8 +481,8 @@ public class RSAUtils {
 	private static Key generatePublicKey(String publicKeyStr) {
 		String publicKeyString = publicKeyStr;
 		try {
-			byte[] buffer = Base64Decoder.decodeToBytes(publicKeyString);
-			KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
+			byte[] buffer = strToBase64(publicKeyString);
+			KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM, new BouncyCastleProvider());
 			X509EncodedKeySpec keySpec = new X509EncodedKeySpec(buffer);
 			Key publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpec);
 			return publicKey;
@@ -491,8 +511,8 @@ public class RSAUtils {
 	private static Key generatePrivateKey(String privateKeyStr) {
 		String privateKeyString = privateKeyStr;
 		try {
-			byte[] buffer = Base64Decoder.decodeToBytes(privateKeyString);
-			KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM);
+			byte[] buffer = strToBase64(privateKeyString);
+			KeyFactory keyFactory = KeyFactory.getInstance(ALGORITHM, new BouncyCastleProvider());
 			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buffer);
 			Key privateKey = (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
 			return privateKey;
@@ -555,10 +575,10 @@ public class RSAUtils {
 	 * @return Key字符串形式
 	 */
 	public static String toKeyString(Key key) {
-		return new String(Base64Encoder.encodeFromBytes(key.getEncoded()));
+		return new String(base64ToStr(key.getEncoded()));
 	}
 
-	private RSAUtils() {
+	private RSA2Utils() {
 
 	}
 
@@ -572,7 +592,7 @@ public class RSAUtils {
 	 * @return 密文
 	 */
 	public static String encryptByPublicKey(String cryptoSrc, Key publicKey) {
-		RSAUtils rsa = new RSAUtils();
+		RSA2Utils rsa = new RSA2Utils();
 		rsa.publicKey = publicKey;
 		rsa.publicKeyString = toKeyString(publicKey);
 		return rsa.encryptByPublicKey(cryptoSrc);
@@ -588,7 +608,7 @@ public class RSAUtils {
 	 * @return 明文
 	 */
 	public static String decryptByPublicKey(String cryptoSrc, Key publicKey) {
-		RSAUtils rsa = new RSAUtils();
+		RSA2Utils rsa = new RSA2Utils();
 		rsa.publicKey = publicKey;
 		rsa.publicKeyString = toKeyString(publicKey);
 		return rsa.decryptByPublicKey(cryptoSrc);
@@ -604,7 +624,7 @@ public class RSAUtils {
 	 * @return 密文
 	 */
 	public static String encryptByPrivateKey(String cryptoSrc, Key privateKey) {
-		RSAUtils rsa = new RSAUtils();
+		RSA2Utils rsa = new RSA2Utils();
 		rsa.privateKey = privateKey;
 		rsa.privateKeyString = toKeyString(privateKey);
 		return rsa.encryptByPrivateKey(cryptoSrc);
@@ -620,10 +640,32 @@ public class RSAUtils {
 	 * @return 明文
 	 */
 	public static String decryptByPrivateKey(String cryptoSrc, Key privateKey) {
-		RSAUtils rsa = new RSAUtils();
+		RSA2Utils rsa = new RSA2Utils();
 		rsa.privateKey = privateKey;
 		rsa.privateKeyString = toKeyString(privateKey);
 		return rsa.decryptByPrivateKey(cryptoSrc);
+	}
+
+	/**
+	 * 使用xml的Base64Binary
+	 * 
+	 * @param b
+	 *            二进制
+	 * @return base64的字符串
+	 */
+	private static String base64ToStr(byte[] b) {
+		return javax.xml.bind.DatatypeConverter.printBase64Binary(b);
+	}
+
+	/**
+	 * 使用xml的Base64Binary
+	 * 
+	 * @param str
+	 *            base64字符串
+	 * @return 二进制
+	 */
+	private static byte[] strToBase64(String str) {
+		return javax.xml.bind.DatatypeConverter.parseBase64Binary(str);
 	}
 
 }

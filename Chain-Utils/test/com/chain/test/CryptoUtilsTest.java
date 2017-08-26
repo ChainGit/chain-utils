@@ -126,44 +126,25 @@ public class CryptoUtilsTest {
 		AESUtils aes = factoryBean.getAesUtils(true);
 		DESUtils des = factoryBean.getDesUtils(true);
 
-		String enstr1 = rsa.encryptByPublicKey("{\"t\":\"123\"}");
+		// String publicModulusString = rsa.getPublicModulusString();
+		// String publicExponentString = rsa.getPublicExponentString();
+		// System.out.println(publicModulusString);
+		// System.out.println(publicExponentString);
+
+		String enstr1 = rsa.encryptByPublicKey(text);
 		System.out.println(enstr1);
 		String destr1 = rsa.decryptByPrivateKey(enstr1);
 		System.out.println(destr1);
 
+		// 验证是否加密结果一致
+		enstr1 = rsa.encryptByPublicKey(text);
+		System.out.println(enstr1);
+		destr1 = rsa.decryptByPrivateKey(enstr1);
+		System.out.println(destr1);
+
 		String enstr2 = rsa.encryptByPrivateKey(text);
 		System.out.println(enstr2);
-		String destr2 = rsa
-				.decryptByPublicKey("qThHD55Wt2TZRPbuRHcgoV4MhfhOL3NZHCVtRYh+otyo1b8BsTCujwezn4GzVc9qAKl6iYdhf5MH\r\n"
-						+ "aVcfjPGBjXwOp3qvD+f/c8E0z18x58OnJh042bExhQMdm9t3QVaFzOp9i/galg81ICrP49YObqc2\r\n"
-						+ "5Rc5uYapM3YcuMLCkk0YxveVs1iAVwEl6jXDm/T/R61d9I2PE6nvcumzUIJD9CW8TN0eoof9en9b\r\n"
-						+ "+AzqaVdPL8JOlIxrqPuDpNlyfD+G2w9LNYSbThHhPaYq2OkYLxSc91xHy36NlB6RoBIJS2XaXINf\r\n"
-						+ "pMOXJ1JyvcytuFQqCM6UudxPZ52rfibPS4IcLLQ+JOYGbtbsbheZry8iLTm7Z3V1uXq/jBCEJK6G\r\n"
-						+ "u3d5MdczKRvjwkVeTViqbahElRGx4fuwqErX+sGGic1CGp+BjJarzIFWECebkaqmWBo98uI8zwAW\r\n"
-						+ "V+dEl9D5tv14sCU0cBBeZGXS/Fn4/NXHrY0xDauqmKduoz50jTVmHo0o");
-		System.out.println(destr2);
-		destr2 = rsa
-				.decryptByPublicKey("Rv+jbt5buRPMoHn8a3ocRhEYPrICPDdi2IDSUMNnhw29AuaJeXxBkAQ6t74WQSKxHxPXIbS1P+hS\r\n"
-						+ "CMvGl76G2Z80qKiGyhE9zkQYwnfOSmGbzdqEsbPH6VSe6kB1m7hbEhfydSfbA4hgUK1HdXRnp51Y\r\n"
-						+ "wemRNlSNPRTNIZS+IVY=");
-		System.out.println(destr2);
-		destr2 = rsa
-				.decryptByPublicKey("McN2/Syl0vLUQfkLBKeOQvLCiI//0I9lrtkLrFz7LJNT6eS8r5PZ36xAF9h1o9fSDu2B1daK3hcm\r\n"
-						+ "DpcOa7Bnx1VVRDu3lW/tSLkGsJz1AFZbPukwimYfn5rM//Ppm6E3ZwL8fbE6UB/bRFSi2+UIl7UL\r\n"
-						+ "37FQW2F12/JJsPOoFCt1SKA6tX7UdMJumfqE3E1g4X3O3QGNQDFoOXZ5L5bu6gDEa8tWlVzhBS6E\r\n"
-						+ "fHCzw1Ycej/KfwZ54R8Dr8I8AWiyBkroCnbYKf0t02UCzMg/cLbBY01SR7POu+Xdrpxus8NfP1R5\r\n"
-						+ "t8O9i/coc2SoigQmf+VGV0dJdr/VdKvYYw6B9Q==");
-		System.out.println(destr2);
-		destr2 = rsa
-				.decryptByPublicKey("EjEvzxdraKYuXq5Pa/j5VmfU4YHT9cvkupayc2oKwaAAaFl8WN687rJOsUyAOHgPUskK0+sccAGr\r\n" + 
-						"wmsJLq2wJxP2If0suEH5CZsLlHqaSyYPuAEDpRtZxBrnitj5s7PfGSJwdJ5uT7cOVYrOytoinRDY\r\n" + 
-						"8HnUXS02xLI0B3OjITYUHEPLDwxtXhjJuSMGmMNOcvUjuzdxwHY9iYXZaPvzmwvRWjV/b7hRjyuW\r\n" + 
-						"QgvxJEmccvE8Va06wtnD284Yyg+KwGeMUe10pS12OpaM2gxoKGMea/ttL4l9Sv1SgqJ1wnOvoRgZ\r\n" + 
-						"Tj+ZFfg7OrrCIRvV1J+9TRApZqGsC115Li16xVZv1SxoOHngKPORtc9DqkuspA1ej/fSfFxpe6+s\r\n" + 
-						"VXNHAJfQJtt1joO4Y0yBidmBg4YQs2ZJ6oNSwUEsAxz1dVmIiOLg6vuK0ez/ulGmo8XKNvYi9ccv\r\n" + 
-						"PiSbdSfOCpkhE+QA1+7Y3Px/6bbdpP1bF7SMSsytTzzTIPwvnbITbFx1VgNreOLJv1ICTzacbPco\r\n" + 
-						"AnKqO8sNTDXOBAMp9hDExtn9/AwLWxwe7VkjgXAeWugeZS6fHD7I+609cNunR20z1XUN7sWuo/sb\r\n" + 
-						"SGhIkt75LCGFDNoFvM5r3V43BkP6bdu0q6XNW1WTIw2zm1WUniwjXZq9jdjMjfhbXLyohOmDFbg=");
+		String destr2 = rsa.decryptByPublicKey(enstr2);
 		System.out.println(destr2);
 
 		String enstr3 = des.encrypt(text);

@@ -11,10 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
-import com.chain.utils.StringUtils;
+import com.chain.utils.EmptyUtils;
 
 /**
  * 常用需要密码的加密方法的汇总（DES,AES,RSA），也是一个FactoryBean，可注入Spring容器使用
+ * 
+ * <br>
+ * MD5和Base64可以直接使用静态方法
  * 
  * @author Chain Qian
  * @version 1.0
@@ -37,7 +40,7 @@ public class CryptoFactoryBean {
 	 *            检查的字符串
 	 */
 	private void checkStr(String keyStr) {
-		if (StringUtils.isEmpty(keyStr))
+		if (EmptyUtils.isEmpty(keyStr))
 			throw new ChainUtilsRuntimeException("key is empty or null");
 	}
 
@@ -258,7 +261,7 @@ public class CryptoFactoryBean {
 		String key2 = keyStore.get(DES_SECOND_KEY);
 		String key3 = keyStore.get(DES_THIRD_KEY);
 		if (desUtils == null)
-			if (StringUtils.isEmpty(key1) && StringUtils.isEmpty(key2) && StringUtils.isEmpty(key3))
+			if (EmptyUtils.isEmpty(key1) && EmptyUtils.isEmpty(key2) && EmptyUtils.isEmpty(key3))
 				throw new ChainUtilsRuntimeException("three keys must have at least one which is not empty or null");
 		if (!isSingleTon)
 			return new DESUtils(key1, key2, key3);
