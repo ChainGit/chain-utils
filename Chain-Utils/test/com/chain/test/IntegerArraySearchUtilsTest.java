@@ -26,6 +26,9 @@ public class IntegerArraySearchUtilsTest {
 		System.out.println(IntegerArraySearchUtils.halfSearch(a, 10));
 		System.out.println(IntegerArraySearchUtils.halfSearch(a, 20));
 
+		a = new int[] { 2, 4, 7, 9, 11, 15, 23, 27, 29, 31, 35, 40, 43, 50, 65 };
+		System.out.println(IntegerArraySearchUtils.halfSearch(a, 43));
+
 		// other test
 		// System.out.println(IntegerArraySearchUtils.halfSearch(null, 8));
 	}
