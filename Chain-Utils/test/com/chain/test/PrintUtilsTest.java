@@ -10,6 +10,7 @@ public class PrintUtilsTest {
 	@Test
 	public void test() {
 		PrintUtils.show(123);
+
 		throw new ChainUtilsRuntimeException("error");
 	}
 
