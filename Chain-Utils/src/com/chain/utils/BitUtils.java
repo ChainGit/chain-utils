@@ -8,10 +8,11 @@ import com.chain.logging.ChainUtilsLoggerFactory;
 /**
  * 整数的位运算工具类（很强大的）
  * 
+ * http://www.cnblogs.com/zichi/p/4789439.html
+ * 
  * @author Chain Qian
  * @version 1.0
- * @see http://www.cnblogs.com/zichi/p/4789439.html
- *
+ * 
  */
 public class BitUtils {
 
@@ -234,7 +235,8 @@ public class BitUtils {
 	 * 去除右边连续的0（右边第一位需要为0）
 	 * 
 	 * @param n
-	 * @return
+	 *            被操作的数
+	 * @return 结果
 	 */
 	public static int removeRightContinuousZero(int n) {
 		return n >> (int) (Math.log(n & -n) / Math.log(2));
@@ -268,7 +270,8 @@ public class BitUtils {
 	 * 获得从右往左看出现的第一个为1的位的下标（下标从1开始，也是从右往左数）
 	 * 
 	 * @param n
-	 * @return
+	 *            被操作的数
+	 * @return 结果
 	 */
 	public static int getRightFirstOneIndex(int n) {
 		return n & -n;
