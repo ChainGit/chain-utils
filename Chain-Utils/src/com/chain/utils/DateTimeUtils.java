@@ -1,5 +1,6 @@
 package com.chain.utils;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,6 +53,25 @@ public class DateTimeUtils {
 		Period period = Period.between(flocalDate, olocalDate);
 		int days = period.getDays();
 		return days;
+	}
+
+	/**
+	 * 获得两个日期之间的秒数差
+	 * 
+	 * 比如： fDate: 2017/07/24 12:00:00 oDate: 2017/07/24 12:00:01 返回为+1
+	 *
+	 * @param fDate
+	 *            时间1
+	 * @param oDate
+	 *            时间2
+	 * @return 时间1比时间2早多少秒
+	 */
+	public static long secondsOfTwo(Date fDate, Date oDate) {
+		LocalDateTime flocalDateTime = fDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+		LocalDateTime olocalDateTime = oDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+		Duration duration = Duration.between(flocalDateTime, olocalDateTime);
+		long seconds = duration.getSeconds();
+		return seconds;
 	}
 
 	public static long convertDateToLong(Date date) {

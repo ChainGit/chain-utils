@@ -10,9 +10,9 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * Java的压缩/解压缩默认实现是基于ZLib的
@@ -23,7 +23,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class ZLibUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(ZLibUtils.class);
+	private static Logger logger = ChainUtilsLoggerFactory.getLogger(ZLibUtils.class);
 
 	private ZLibUtils() {
 	}
