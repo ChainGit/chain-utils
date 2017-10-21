@@ -267,14 +267,37 @@ public class BitUtils {
 	}
 
 	/**
+	 * 获得从右往左看出现的第一个为1的位的下标对应的十进制数（下标从1开始，也是从右往左数）
+	 * 
+	 * 如果返回0，则代表没有找到
+	 * 
+	 * @param n
+	 *            被操作的数
+	 * @return 结果
+	 */
+	public static int getRightFirstOneIndexOfDecimal(int n) {
+		return n & -n;
+	}
+
+	/**
 	 * 获得从右往左看出现的第一个为1的位的下标（下标从1开始，也是从右往左数）
+	 * 
+	 * 如果返回0，则代表没有找到
 	 * 
 	 * @param n
 	 *            被操作的数
 	 * @return 结果
 	 */
 	public static int getRightFirstOneIndex(int n) {
-		return n & -n;
+		int p = getRightFirstOneIndexOfDecimal(n);
+		if (p == 0)
+			return p;
+		int i = 1;
+		while (p != 1) {
+			p >>>= 1;
+			i++;
+		}
+		return i;
 	}
 
 	// ----------------- 其他操作 -----------------

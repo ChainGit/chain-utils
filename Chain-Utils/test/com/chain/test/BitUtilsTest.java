@@ -95,7 +95,11 @@ public class BitUtilsTest {
 		System.out.println(BitUtils.isSameSignal(n1, -n2));
 
 		System.out.println();
-		int n11 = BitUtils.getRightFirstOneIndex(n1);
+		int n11 = BitUtils.getRightFirstOneIndex(8);
+		System.out.println(n11);
+
+		System.out.println();
+		n11 = BitUtils.getRightFirstOneIndexOfDecimal(8);
 		System.out.println(n11);
 
 		System.out.println();
