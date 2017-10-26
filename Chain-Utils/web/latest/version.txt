@@ -1,0 +1,4 @@
+version=1.1.8
+MD5=5ca1992ef04bd42954c79cfdc1f2e86c
+SHA1=3aecf3e8a59e365a49a8b9ffb6de5db9a110aa4f
+CRC32=6e45477d

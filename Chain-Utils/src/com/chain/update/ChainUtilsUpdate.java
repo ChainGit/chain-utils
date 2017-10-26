@@ -20,7 +20,7 @@ import java.util.Properties;
  * chain-utils更新类
  * 
  * @author Chain Qian
- * @version 1.2
+ * @version 1.2.1
  *
  */
 public class ChainUtilsUpdate {
@@ -33,7 +33,7 @@ public class ChainUtilsUpdate {
 
 	private static String version = null;
 
-	private static final String baseURL = "http://www.leechain.top/uploads/chain-utils/latest/";
+	private static final String baseURL = "https://github.com/ChainGit/chain-utils/tree/master/Chain-Utils/web/";
 
 	private static final String baseName = "chain-utils-";
 
@@ -65,23 +65,19 @@ public class ChainUtilsUpdate {
 	 *             异常
 	 */
 	public static void deploy(String dir) throws Exception {
+		File baseDir = new File(dir);
+		if (!baseDir.exists())
+			baseDir.mkdirs();
 		File file = new File("");
 		String workPath = file.getAbsolutePath();
 		// System.out.println(workPath);
-		String currentVersion = localProp.getProperty("version");
-		String newVersionPath = dir + File.separator + currentVersion;
 		String latestVersionPath = dir + File.separator + "latest";
 		ChainUtilsUpdateUtils fdu = new ChainUtilsUpdateUtils();
-		File newVersionDir = new File(newVersionPath);
-		if (newVersionDir.exists())
-			fdu.deleteDirectory(newVersionDir);
-		newVersionDir.mkdirs();
 		File latestVersionDir = new File(latestVersionPath);
 		if (latestVersionDir.exists())
 			fdu.emptyDirectory(latestVersionDir);
 		latestVersionDir.mkdirs();
 		File newestJar = new File(workPath + File.separator + "out" + File.separator + fullName);
-		ChainUtilsUpdateUtils.getInstance().copyFile(newestJar, new File(newVersionDir + File.separator + fullName));
 		File javadocJar = new File(
 				workPath + File.separator + "out" + File.separator + baseName + "javadoc" + tailName);
 		ChainUtilsUpdateUtils.getInstance().copyFile(javadocJar,

@@ -1,0 +1,94 @@
+<b>工具包依赖：</b><br/>
+<br/>
+支持的log包：<br/>
+1、slf4j<br/>
+2、logback<br/>
+<br/>
+部分功能需要：<br/>
+1、servlet-api<br/>
+2、bcprov<br/>
+3、jmimemagic<br/>
+4、pinyin4j<br/>
+5、jackson<br/>
+<br/>
+<hr/><br/>
+<br/>
+<b>更新记录：</b><br/>
+<br/>
+2017.10.26 - chain-utils-1.1.8:<br/>
+1、更新工具类自更新方法<br/>
+<br/>
+2017.10.20 - chain-utils-1.1.7:<br/>
+1、加入整数位运算工具类BitUtils<br/>
+<br/>
+2017.10.14 - chain-utils-1.1.6:<br/>
+1、加入数据压缩和解压缩工具类ZLibUtils<br/>
+<br/>
+2017.10.09 - chain-utils-1.1.5:<br/>
+1、完善排序工具类，共12种常见排序方法<br/>
+<br/>
+2017.08.26 - chain-utils-1.1.4:<br/>
+1、优化AESUtils<br/>
+2、加入CryptoJs<br/>
+<br/>
+2017.08.25 - chain-utils-1.1.3:<br/>
+1、添加使用bcprov的RSA2Utils<br/>
+2、加入jsencrypt的rsa相关js文件<br/>
+3、加入URLUtils<br/>
+4、加入NumberUtils<br/>
+5、加入Java8的DateTimeUtils时间工具类<br/>
+6、加入EmptyUtils工具类<br/>
+7、完善CryptoFactoryBean<br/>
+<br/>
+2017.08.15 - chain-utils-1.1.2：<br/>
+1、优化RSAUtils的使用<br/>
+2、加入CryptoFactoryBean，方便Spring的使用<br/>
+<br/>
+2017.08.10 - chain-utils-1.1.1：<br/>
+1、参照mybatis设计，使得slf4j是可选的<br/>
+2、分离doc成单独的jar包<br/>
+<br/>
+2017.08.08 - chain-utils-1.1.0：<br/>
+1、完善异常处理方式<br/>
+<br/>
+2017.08.07 - chain-utils-1.0.9：<br/>
+1、汉语转拼音<br/>
+<br/>
+2017.08.05 - chain-utils-1.0.8：<br/>
+1、Cookie常用操作<br/>
+2、文件简单上传和下载<br/>
+3、加入log的使用(slf4j和logback)<br/>
+<br/>
+2017.08.01 - chain-utils-1.0.7：<br/>
+1、完善本工具包的更新逻辑<br/>
+<br/>
+2017.07.27 - chain-utils-1.0.6：<br/>
+1、文件文件夹的常用操作<br/>
+2、修复已知bug<br/>
+<br/>
+2017.07.19 - chain-utils-1.0.5：<br/>
+1、优化本工具包的更新逻辑<br/>
+2、常用的加解密算法<br/>
+3、文件校验工具类<br/>
+4、添加doc文档<br/>
+<br/>
+2017.07.08 - chain-utils-1.0.4：<br/>
+1、检测并获取本工具包的最新版本<br/>
+<br/>
+2017.06.20 - chain-utils-1.0.3：<br/>
+1、IPv4地址工具类<br/>
+<br/>
+2017.05.21 - chain-utils-1.0.2：<br/>
+1、对象和Map之间的互转<br/>
+2、对象序列化工具类<br/>
+<br/>
+2017.04.21 - chain-utils-1.0.1：<br/>
+1、常见的生成随机整形数组的方法<br/>
+2、常见的生成随机字符串的方法<br/>
+3、进制转化工具类<br/>
+4、反射工具类<br/>
+<br/>
+2017.03.19 - chain-utils-1.0.0：<br/>
+1、常见的整形数组排序算法<br/>
+2、常见的整形数组查找算法<br/>
+3、控制台打印简化书写工具类<br/>
