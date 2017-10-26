@@ -35,6 +35,8 @@ public class ChainUtilsUpdate {
 
 	private static final String baseURL = "https://github.com/ChainGit/chain-utils/tree/master/Chain-Utils/web/";
 
+	private static final String latestVersionTxt = "https://raw.githubusercontent.com/ChainGit/chain-utils/master/Chain-Utils/web/latest/version.txt";
+
 	private static final String baseName = "chain-utils-";
 
 	private static final String tailName = ".jar";
@@ -122,7 +124,7 @@ public class ChainUtilsUpdate {
 	 * @return 是否最新
 	 */
 	public static boolean check() throws IOException {
-		URL url = new URL(baseURL + "version.txt");
+		URL url = new URL(latestVersionTxt);
 		URLConnection conn = url.openConnection();
 		InputStream is = conn.getInputStream();
 		serverProp = new Properties();
