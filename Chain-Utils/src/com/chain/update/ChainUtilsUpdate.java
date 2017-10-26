@@ -113,6 +113,16 @@ public class ChainUtilsUpdate {
 		fos.write(("CRC32=" + crc32 + "\r\n").getBytes());
 		fos.flush();
 		fos.close();
+		ChainUtilsUpdateUtils.getInstance().copyFile(versionTxt,
+				latestVersionPath + File.separator + "version_web.txt");
+		BufferedOutputStream fos2 = new BufferedOutputStream(
+				new FileOutputStream(new File(latestVersionPath + File.separator + "version_web.txt"), true));
+		fos2.write("<br>".getBytes());
+		fos2.write(("MD5=" + md5 + "<br>").getBytes());
+		fos2.write(("SHA1=" + sha1 + "<br>").getBytes());
+		fos2.write(("CRC32=" + crc32 + "<br>").getBytes());
+		fos2.flush();
+		fos2.close();
 	}
 
 	/**
