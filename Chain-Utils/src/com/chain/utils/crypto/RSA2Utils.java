@@ -22,6 +22,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.xml.bind.DatatypeConverter;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
@@ -654,7 +655,7 @@ public class RSA2Utils {
 	 * @return base64的字符串
 	 */
 	private static String base64ToStr(byte[] b) {
-		return javax.xml.bind.DatatypeConverter.printBase64Binary(b);
+		return DatatypeConverter.printBase64Binary(b);
 	}
 
 	/**
@@ -665,7 +666,7 @@ public class RSA2Utils {
 	 * @return 二进制
 	 */
 	private static byte[] strToBase64(String str) {
-		return javax.xml.bind.DatatypeConverter.parseBase64Binary(str);
+		return DatatypeConverter.parseBase64Binary(str);
 	}
 
 }

@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 是否为空的判断
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class EmptyUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(EmptyUtils.class);
+	private static Logger logger = ChainUtilsLoggerFactory.getLogger(EmptyUtils.class);
 
 	/**
 	 * 判断字符串是否为空

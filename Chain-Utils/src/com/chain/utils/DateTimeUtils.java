@@ -10,9 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * Java8的时间日期工具类
@@ -23,7 +23,7 @@ import com.chain.exception.ChainUtilsRuntimeException;
  */
 public class DateTimeUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(DateTimeUtils.class);
+	private static Logger logger = ChainUtilsLoggerFactory.getLogger(DateTimeUtils.class);
 
 	/**
 	 * 获得指定pattern的DateTimeFormatter

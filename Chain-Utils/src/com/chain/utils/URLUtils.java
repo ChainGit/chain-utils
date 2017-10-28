@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.chain.logging.ChainUtilsLoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class URLUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(URLUtils.class);
+	private static Logger logger = ChainUtilsLoggerFactory.getLogger(URLUtils.class);
 
 	/**
 	 * 发起Url并获取到返回的json

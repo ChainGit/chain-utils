@@ -1,7 +1,8 @@
 package com.chain.utils;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * 字符串工具类
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class StringUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(StringUtils.class);
+	private static Logger logger = ChainUtilsLoggerFactory.getLogger(StringUtils.class);
 
 	/**
 	 * 数组合并(增长)

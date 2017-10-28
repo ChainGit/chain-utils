@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.chain.exception.ChainUtilsRuntimeException;
+import com.chain.logging.ChainUtilsLoggerFactory;
 import com.chain.utils.EmptyUtils;
 
 /**
@@ -25,7 +25,7 @@ import com.chain.utils.EmptyUtils;
  */
 public class CryptoFactoryBean {
 
-	private static Logger logger = LoggerFactory.getLogger(CryptoFactoryBean.class);
+	private static Logger logger = ChainUtilsLoggerFactory.getLogger(CryptoFactoryBean.class);
 
 	private Map<String, String> keyStore;
 

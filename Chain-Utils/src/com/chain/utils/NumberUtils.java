@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.chain.logging.ChainUtilsLoggerFactory;
 
 /**
  * Number类的工具类
@@ -14,7 +15,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NumberUtils {
 
-	private static Logger logger = LoggerFactory.getLogger(NumberUtils.class);
+	private static Logger logger = ChainUtilsLoggerFactory.getLogger(NumberUtils.class);
 
 	/**
 	 * 是否为0
