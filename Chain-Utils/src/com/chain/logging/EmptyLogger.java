@@ -23,13 +23,11 @@ public class EmptyLogger implements Logger {
 
 	@Override
 	public String getName() {
-
-		return null;
+		return "default empty logger";
 	}
 
 	@Override
 	public boolean isTraceEnabled() {
-
 		return false;
 	}
 

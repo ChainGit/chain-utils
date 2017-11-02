@@ -343,6 +343,8 @@ public class ScaleConvertUtils {
 		}
 	}
 
+	// 2017-11-02补充：通过浮点数存储原理实现的方法参见FloatDoubleConvertUtils
+	// 注意：这里的转换如果二进制首部开始为0，并不会自动补0
 	private StringBuffer floatPointNumberMethod(Object obj, int scale) {
 		// TODO 浮点数暂不支持
 		StringBuffer sb = new StringBuffer();
