@@ -189,6 +189,9 @@ public class IntegerArraySortUtils {
 		checkArray(a);
 		int n = a.length;
 		for (int i = 1; i < n; i++) {
+
+			// 从已排序好的元素倒过来找到合适的位置插入
+
 			// 方法一：类似降序的冒泡排序法
 			// method3a(a, i);
 
