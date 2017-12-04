@@ -32,7 +32,7 @@ public class NumberUtils {
 				return true;
 		} else if (number instanceof Float || number instanceof Double || number instanceof BigDecimal) {
 			BigDecimal t = new BigDecimal(number.doubleValue());
-			if (t.equals(new BigDecimal(0)))
+			if (new BigDecimal(0).equals(t))
 				return true;
 		}
 		return false;
