@@ -15,6 +15,11 @@
 <br/>
 <b>更新记录：</b><br/>
 <br/>
+2017.12.13 - chain-utils-1.2.2:<br/>
+1、完善Inet4Address工具类<br/>
+2、完善DateTime工具类<br/>
+3、完善IntegerArraySearch工具类，加入Hash查找<br/>
+<br/>
 2017.11.08 - chain-utils-1.2.1:<br/>
 1、编译版本改为使用Java8<br/>
 <br/>

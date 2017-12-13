@@ -96,4 +96,31 @@ public class IntegerArraySearchUtils {
 		} while (min <= max);
 		return -1 - min;
 	}
+
+	/**
+	 * 利用hash查找无序表中的某一个元素（只是演示算法，并不是最优的）
+	 * 
+	 * @param a
+	 *            待查找数组
+	 * @param k
+	 *            查找的数据
+	 * @return 若找到则返回元素所在数组的<i>下标</i>，若没有找到返回-1
+	 */
+	public static int hashSearch(int[] a, int k) {
+		int base = 10;
+		int len = a.length;
+		if (len < base)
+			return orderSearch(a, k);
+		int[] f = new int[base];
+		int[][] h = new int[base][len];
+		int[][] s = new int[base][len];
+		for (int i = 0; i < len; i++) {
+			int v = Math.abs(a[i]) % base;
+			h[v][f[v]] = a[i];
+			s[v][f[v]++] = i;
+		}
+		int e = Math.abs(k) % base;
+		int p = orderSearch(h[e], k);
+		return p == -1 ? -1 : s[e][p];
+	}
 }

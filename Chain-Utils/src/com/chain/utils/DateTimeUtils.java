@@ -87,6 +87,18 @@ public class DateTimeUtils {
 	}
 
 	/**
+	 * 指定过去的时间（long型）比现在早多长时间
+	 * 
+	 * @param earlier
+	 *            指定过去的时间（long型）
+	 * @return 比现在早多长时间
+	 */
+	public static long earlierSeconds(long earlier) {
+		long current = System.currentTimeMillis();
+		return (current - earlier) / 1000;
+	}
+
+	/**
 	 * 使用java8的新时间API，也可以使用Joda-Time
 	 * 
 	 * @param date

@@ -1,1 +1,1 @@
-version=1.2.1<br>MD5=2655f88ebe890c794a05cf07b28f62f2<br>SHA1=a95840425aae1ba8214464cf7505d912b6c86d71<br>CRC32=ebe6294e<br>
+version=1.2.2<br>MD5=51f7dab0d9da8d02825c1f861c25ac13<br>SHA1=6d290d05b65a5ed8ad456dfc90efec7e4f8fdfee<br>CRC32=e7cc31e1<br>

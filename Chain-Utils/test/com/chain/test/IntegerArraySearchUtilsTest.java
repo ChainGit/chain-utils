@@ -29,6 +29,10 @@ public class IntegerArraySearchUtilsTest {
 		a = new int[] { 2, 4, 7, 9, 11, 15, 23, 27, 29, 31, 35, 40, 43, 50, 65 };
 		System.out.println(IntegerArraySearchUtils.halfSearch(a, 43));
 
+		a = RandomIntegerArrayUtils.randomSelectArray(0, 1000, 500);
+		System.out.println(IntegerArraySearchUtils.orderSearch(a, 100));
+		System.out.println(IntegerArraySearchUtils.hashSearch(a, 100));
+
 		// other test
 		// System.out.println(IntegerArraySearchUtils.halfSearch(null, 8));
 	}

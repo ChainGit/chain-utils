@@ -247,4 +247,65 @@ public class Inet4AddressUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * 字符串IP转整数
+	 * 
+	 * @param sip
+	 *            字符串I
+	 * @return 整数
+	 */
+	public static int strIp2int(String sip) {
+		String[] ips = sip.split("\\.");
+		int ip = 0;
+		for (int i = 0; i < ips.length; i++)
+			ip += Integer.valueOf(ips[i]) << ((3 - i) << 3);
+		return ip;
+	}
+
+	/**
+	 * 整数转字符串IP
+	 * 
+	 * @param ip
+	 *            整数形式IP
+	 * @return 字符串IP
+	 */
+	public static String intIp2Str(int ip) {
+		String[] ips = new String[4];
+		for (int i = 0; i < ips.length; i++)
+			ips[i] = String.valueOf((ip >>> ((3 - i) << 3)) & 0xff);
+		return String.join(".", ips);
+	}
+
+	/**
+	 * 整数IP转byte数组（小端）
+	 * 
+	 * @param ip
+	 *            整数IP
+	 * @return byte数组（小端）
+	 */
+	public static byte[] intIp2Bytes(int ip) {
+		byte[] bips = new byte[4];
+		bips[0] = (byte) ((ip >>> 24) & 0xff);
+		bips[1] = (byte) ((ip >>> 16) & 0xff);
+		bips[2] = (byte) ((ip >>> 8) & 0xff);
+		bips[3] = (byte) (ip & 0xff);
+		return bips;
+	}
+
+	/**
+	 * byte数组（小端）转整数IP
+	 * 
+	 * @param bips
+	 *            byte数组（小端）
+	 * @return 整数IP
+	 */
+	public static int bytesIp2int(byte[] bips) {
+		if (bips == null || bips.length < 4)
+			throw new RuntimeException("byte array length should be 4");
+		int ip = 0;
+		for (int i = 0; i < 4; i++)
+			ip += bips[i] << ((3 - i) << 3);
+		return ip;
+	}
+
 }
